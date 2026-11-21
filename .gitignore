@@ -1,0 +1,17 @@
+# 本地记忆 / 会话数据
+.workbuddy/
+
+# 含学员数据与运行口令的库文件
+works-app/db.json
+works-app/legacy.json
+works-app/db.seed.json
+
+# 备份与临时文件
+*.bak.*
+*.bak
+*.log
+*.tmp
+.DS_Store
+
+# 依赖
+node_modules/

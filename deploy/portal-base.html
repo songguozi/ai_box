@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小盒子AI乐园</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f5f6fa; color: #2c3e50; line-height: 1.6;
+}
+.hero {
+  background: linear-gradient(135deg, #534AB7 0%, #7F77DD 100%);
+  color: #fff; padding: 64px 24px 56px; text-align: center;
+}
+.hero h1 { font-size: 32px; font-weight: 600; letter-spacing: 2px; }
+.hero p { margin-top: 12px; font-size: 15px; opacity: .85; }
+.hero .badge {
+  display: inline-block; margin-top: 20px; padding: 6px 16px;
+  background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px; font-size: 13px;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 40px 24px 64px; }
+.section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.section-title::before { content: ""; width: 4px; height: 20px; background: #534AB7; border-radius: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.card {
+  background: #fff; border-radius: 14px; padding: 26px;
+  border: 1px solid #e8e8f0; transition: transform .2s, box-shadow .2s;
+  display: flex; flex-direction: column;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(83,74,183,.12); }
+.card .icon { font-size: 36px; margin-bottom: 14px; }
+.card .icon.seal {
+  width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+  background: linear-gradient(145deg, #173f3b, #26695f); color: #f8e5b8;
+  border: 1px solid #d6b56f; box-shadow: inset 0 0 0 3px rgba(248,229,184,.12);
+  font-family: "STKaiti", "KaiTi", serif; font-size: 15px; font-weight: 700;
+  letter-spacing: 1px;
+}
+.card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.card .desc { font-size: 14px; color: #6b7280; flex: 1; margin-bottom: 16px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.tag {
+  font-size: 12px; padding: 3px 10px; border-radius: 999px;
+  background: #EEEDFE; color: #534AB7;
+}
+.tag.green { background: #E1F5EE; color: #0F6E56; }
+.tag.amber { background: #FAEEDA; color: #854F0B; }
+.meta { font-size: 12px; color: #9ca3af; border-top: 1px dashed #e8e8f0; padding-top: 12px; margin-bottom: 16px; }
+.meta div { display: flex; justify-content: space-between; padding: 2px 0; }
+.btn {
+  display: block; text-align: center; padding: 10px; border-radius: 9px;
+  background: #534AB7; color: #fff; text-decoration: none; font-size: 14px; font-weight: 500;
+}
+.btn:hover { background: #3C3489; }
+footer { text-align: center; font-size: 12px; color: #9ca3af; padding: 28px 16px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>小盒子AI乐园</h1>
+  <div class="badge">🤖 所有应用均由 AI 一句话部署上线</div>
+</div>
+
+<div class="container">
+
+  <div class="section-title">已部署应用</div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="icon">🐠</div>
+      <h3>鱼吃鱼 · 海洋图鉴之旅</h3>
+      <div class="desc">摇杆控制小鱼探索海洋，争夺绿宝石升级、吞鱼收集图鉴。吃满 5 条河豚即可解锁河豚，逐步获得更多稀有鱼类与新海域。</div>
+      <div class="tags">
+        <span class="tag">海洋冒险</span>
+        <span class="tag green">30 种鱼类</span>
+        <span class="tag amber">15 个海域</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/fish-eat-fish/</span></div>
+        <div><span>当前版本</span><span>20260927143731</span></div>
+        <div><span>操作方式</span><span>摇杆 / 键盘</span></div>
+      </div>
+      <a class="btn" href="/fish-eat-fish/">开始吞噬 →</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">🎯</div>
+      <h3>边境行动</h3>
+      <div class="desc">可直接试玩的单人 3D 第一人称战术射击游戏，打开浏览器即刻投入边境战场。</div>
+      <div class="tags">
+        <span class="tag">3D 射击</span>
+        <span class="tag green">纯静态</span>
+        <span class="tag amber">4.1 MB</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/frontier-fps/</span></div>
+        <div><span>当前版本</span><span>20260921073340</span></div>
+        <div><span>部署方式</span><span>releases 软链切换</span></div>
+      </div>
+      <a class="btn" href="/frontier-fps/">开始行动 →</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">👗</div>
+      <h3>梦幻服装设计屋</h3>
+      <div class="desc">为小模特设计专属造型，自由搭配发型、帽子、眼镜、肤色与表情，用画笔、图案和多种立体装饰完成服装作品。</div>
+      <div class="tags">
+        <span class="tag">换装设计</span>
+        <span class="tag green">纯静态</span>
+        <span class="tag amber">作品收藏</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/dress-studio/</span></div>
+        <div><span>当前版本</span><span>20260913001318</span></div>
+        <div><span>部署方式</span><span>releases 软链切换</span></div>
+      </div>
+      <a class="btn" href="/dress-studio/">开始设计 →</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">🦋</div>
+      <h3>蝶梦广场</h3>
+      <div class="desc">在花草点缀的 2D 广场自由换装、拜访 NPC 收集蝴蝶结，摸鱼赚蝴蝶币，挑战巅峰赛与“逃离南瓜”关卡。</div>
+      <div class="tags">
+        <span class="tag">换装冒险</span>
+        <span class="tag green">在线服务</span>
+        <span class="tag amber">2D 探险</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/butterfly-plaza/</span></div>
+        <div><span>当前版本</span><span>20260912155028</span></div>
+        <div><span>部署方式</span><span>Node 服务</span></div>
+      </div>
+      <a class="btn" href="/butterfly-plaza/">进入蝶梦广场 →</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">✨</div>
+      <h3>宠物寻宝奇旅</h3>
+      <div class="desc">培养奇幻宠物、准备食物并派遣它们前往专属场景探索，在观测中陪伴宠物寻找宝物。</div>
+      <div class="tags">
+        <span class="tag">宠物养成</span>
+        <span class="tag green">纯静态</span>
+        <span class="tag amber">40 MB</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/pet-treasure/</span></div>
+        <div><span>当前版本</span><span>20260912185020</span></div>
+        <div><span>部署方式</span><span>releases 软链切换</span></div>
+      </div>
+      <a class="btn" href="/pet-treasure/">开始探索 →</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">👻</div>
+      <h3>AI躲猫</h3>
+      <div class="desc">与聪明 AI 斗智斗勇的躲猫猫游戏，扮演躲藏者藏身五彩幻境躲开 AI 猎人追捕，也可执掌猎人找出全部隐藏者。</div>
+      <div class="tags">
+        <span class="tag">躲猫猫游戏</span>
+        <span class="tag green">纯静态</span>
+        <span class="tag amber">8 MB</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/phantasm-hide-seek/</span></div>
+        <div><span>当前版本</span><span>20260912100051</span></div>
+        <div><span>部署方式</span><span>releases 软链切换</span></div>
+      </div>
+      <a class="btn" href="/phantasm-hide-seek/">开始躲藏 →</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h3>AI 找茬｜60秒梦幻挑战</h3>
+      <div class="desc">50 关梦幻 AI 找茬游戏，60 秒内找出两图全部不同，关卡图片全部由 AI 生成，纯前端单机运行。</div>
+      <div class="tags">
+        <span class="tag">找茬游戏</span>
+        <span class="tag green">纯静态</span>
+        <span class="tag amber">3.6 MB</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/ai-find-diff/</span></div>
+        <div><span>当前版本</span><span>20260910233844</span></div>
+        <div><span>部署方式</span><span>releases 软链切换</span></div>
+      </div>
+      <a class="btn" href="/ai-find-diff/">开始挑战 →</a>
+    </div>
+
+    <div class="card">
+      <div class="icon">🌱</div>
+      <h3>植物守卫战</h3>
+      <div class="desc">植物大战僵尸风格塔防游戏，包含主游戏、植物图鉴、小游戏合集与完整精灵素材，纯前端单机运行。</div>
+      <div class="tags">
+        <span class="tag">塔防游戏</span>
+        <span class="tag green">纯静态</span>
+        <span class="tag amber">17 MB</span>
+      </div>
+      <div class="meta">
+        <div><span>访问路径</span><span>/pvz/</span></div>
+        <div><span>当前版本</span><span>20260908204757</span></div>
+        <div><span>部署方式</span><span>releases 软链切换</span></div>
+      </div>
+      <a class="btn" href="/pvz/">进入游戏 →</a>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>Powered by WorkBuddy · smart-deploy 自动化部署 · 2026</footer>
+
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>权限管理（RBAC）· 小盒子AI乐园 — 原型 V2</title>
+<style>
+:root{
+  --brand:#534AB7; --brand2:#7F77DD; --brand-soft:#EDE7FF;
+  --ink:#2B2745; --muted:#8B87A6; --line:#E9E7F5;
+  --ok:#1D9E5F; --ok-bg:#E5F7EE; --danger:#C8271C; --danger-bg:#FCEBE9;
+  --radius:14px;
+}
+*{margin:0; padding:0; box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:#F6F5FB; color:var(--ink); font-size:14px; line-height:1.6}
+button{font-family:inherit; cursor:pointer; border:none; background:none}
+input,select{font-family:inherit; font-size:13.5px; color:var(--ink); outline:none}
+
+/* ---------- 顶栏（模拟作品集页） ---------- */
+.topbar{position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:11px 22px; background:rgba(255,255,255,.93); backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+.brand{display:flex; align-items:center; gap:9px; font-size:16px; font-weight:700; color:#3C3489; text-decoration:none}
+.brand .sub{font-size:11.5px; font-weight:600; color:#fff;
+  background:linear-gradient(135deg,var(--brand),var(--brand2)); padding:2px 9px; border-radius:999px}
+.tabs{display:flex; gap:8px; margin-left:6px}
+.tab{font-size:14px; font-weight:500; color:#4A41AE; padding:7px 16px; border-radius:999px;
+  border:1px solid #DCDAF7; background:#F1F0FE; white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; border-color:transparent;
+  box-shadow:0 6px 16px rgba(83,74,183,.28)}
+
+/* ---------- 头像 + 下拉菜单（权限管理入口） ---------- */
+.who{position:relative; margin-left:auto}
+.who-btn{display:flex; align-items:center; gap:9px; padding:5px 14px 5px 5px;
+  border:1px solid var(--line); background:#fff; border-radius:999px; font-size:13px; transition:.15s}
+.who-btn:hover{border-color:#cfc9f2; background:#fbfaff}
+.who-btn .ava{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:15px; background:var(--brand-soft)}
+.who-btn .name{font-weight:600; color:#3C3489; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.who-btn .caret{font-size:10px; color:var(--muted); transition:.2s}
+.who.open .who-btn .caret{transform:rotate(180deg)}
+.menu{position:absolute; right:0; top:calc(100% + 8px); width:230px; background:#fff; border:1px solid var(--line);
+  border-radius:14px; box-shadow:0 16px 44px rgba(43,39,69,.16); padding:7px; display:none; z-index:60}
+.who.open .menu{display:block; animation:pop .16s ease}
+@keyframes pop{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
+.menu-head{padding:10px 12px 8px; border-bottom:1px solid var(--line); margin-bottom:6px}
+.menu-head b{display:block; font-size:14px}
+.menu-head span{font-size:12px; color:var(--muted)}
+.menu-item{display:flex; align-items:center; gap:10px; width:100%; text-align:left; font-size:13.5px;
+  padding:9px 12px; border-radius:9px; color:var(--ink)}
+.menu-item:hover{background:#F6F5FD}
+.menu-item .mi{font-size:16px; width:20px; text-align:center}
+.menu-item.danger{color:var(--danger)}
+.menu-item .lock{margin-left:auto; font-size:11px; color:#B6B2C8}
+.menu-item.disabled{opacity:.5; cursor:not-allowed}
+.menu-sep{height:1px; background:var(--line); margin:6px 8px}
+
+/* ---------- 通用 ---------- */
+.wrap{max-width:1120px; margin:0 auto; padding:0 22px}
+.view{display:none}
+.view.active{display:block}
+.hero{padding:34px 0 20px}
+.hero h1{font-size:25px; letter-spacing:.5px}
+.hero h1 em{font-style:normal; color:var(--brand)}
+.hero p{color:var(--muted); font-size:13.5px; margin-top:6px; max-width:680px}
+.eyebrow{display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:1.5px; color:var(--brand2); margin-bottom:8px}
+.btn{display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; padding:9px 18px; border-radius:999px; transition:.15s}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 6px 16px rgba(83,74,183,.28)}
+.btn.ghost{border:1px solid #DCDAF7; color:#4A41AE; background:#fff}
+.btn.ghost:hover{background:#F6F5FD}
+.btn.danger{border:1px solid #F2C4BF; color:var(--danger); background:#fff}
+.btn.sm{padding:5px 12px; font-size:12.5px}
+.card{background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; margin-bottom:18px;
+  box-shadow:0 2px 10px rgba(43,39,69,.04)}
+.card h3{font-size:15.5px; margin-bottom:4px}
+.card .hint{font-size:12.5px; color:var(--muted); margin-bottom:14px}
+.note{background:linear-gradient(135deg,#F3F1FB,#FAF9FE); border:1px dashed #CFC9F2; border-radius:12px;
+  padding:13px 16px; font-size:12.5px; color:#5C5690; margin-bottom:18px}
+
+/* ---------- 模拟作品卡片 ---------- */
+.work-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+@media (max-width:860px){.work-grid{grid-template-columns:repeat(2,1fr)}}
+.work{background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  box-shadow:0 2px 10px rgba(43,39,69,.04); transition:.15s}
+.work:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(43,39,69,.10)}
+.work .cover{height:96px; display:grid; place-items:center; font-size:40px}
+.work .body{padding:12px 14px}
+.work .body b{font-size:13.5px; display:block}
+.work .body span{font-size:11.5px; color:var(--muted)}
+.work .res-lock{font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:999px; background:var(--brand-soft); color:#4A41AE; float:right}
+
+/* ---------- 权限徽章 / 角色 ---------- */
+.perm-chip{display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600;
+  padding:3px 10px; border-radius:999px; background:var(--brand-soft); color:#4A41AE; margin:3px 4px 0 0}
+.role-chip{display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700;
+  padding:3px 11px; border-radius:999px; margin:2px 3px 2px 0; border:1.5px solid; cursor:pointer; transition:.15s}
+.role-chip:hover{transform:translateY(-1px)}
+.role-admin{background:#FCEBE9; color:#A31F15; border-color:#F2C4BF}
+.role-teacher{background:#FCF3E3; color:#8C5A10; border-color:#EFD9A8}
+.role-student{background:#E5F7EE; color:#136B41; border-color:#BEE7D2}
+.role-guest{background:#EDEBFA; color:#4A41AE; border-color:#D5D0F2}
+.role-custom{background:#E4F4FB; color:#0F5E7D; border-color:#BEE3F0}
+.role-chip.off{opacity:.35; filter:grayscale(.6)}
+
+/* ---------- 管理面板（全屏） ---------- */
+.admin{display:none; position:fixed; inset:0; z-index:100; background:#F6F5FB; overflow-y:auto}
+.admin.open{display:block}
+.admin-top{position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:14px;
+  padding:12px 26px; background:rgba(255,255,255,.94); backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+.admin-top .title{font-size:16px; font-weight:700; color:#3C3489}
+.admin-body{display:grid; grid-template-columns:200px 1fr; gap:0; max-width:1120px; margin:0 auto; padding:22px}
+@media (max-width:760px){.admin-body{grid-template-columns:1fr}}
+.side{display:flex; flex-direction:column; gap:6px}
+.side-item{display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:600; color:#4A41AE;
+  padding:10px 14px; border-radius:11px; text-align:left; border:1px solid transparent}
+.side-item:hover{background:#EFEDFB}
+.side-item.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 6px 16px rgba(83,74,183,.25)}
+.side-item .si{font-size:16px; width:20px; text-align:center}
+.side-item .cnt{margin-left:auto; font-size:11px; opacity:.75}
+.main{padding-left:22px}
+@media (max-width:760px){.main{padding-left:0}}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ---------- 矩阵 / 表格 ---------- */
+.matrix-wrap,.tbl-wrap{overflow-x:auto}
+table.matrix{width:100%; border-collapse:separate; border-spacing:0; font-size:13px; min-width:620px}
+.matrix th,.matrix td{padding:10px 12px; text-align:center; border-bottom:1px solid var(--line)}
+.matrix thead th{font-size:12.5px; color:var(--muted); font-weight:600; background:#FAF9FE}
+.matrix tbody th{text-align:left; font-weight:600; white-space:nowrap}
+.matrix .pgroup td,.matrix .pgroup th{background:#F3F1FB; font-size:11.5px; letter-spacing:1px; color:#6A63B8; font-weight:700; padding:6px 12px}
+.matrix .pdesc{display:block; font-size:11.5px; color:var(--muted); font-weight:400}
+input[type=checkbox]{width:17px; height:17px; accent-color:var(--brand); cursor:pointer}
+.matrix tbody tr:hover{background:#FBFAFF}
+table.tbl{width:100%; border-collapse:collapse; font-size:13.5px}
+.tbl th{text-align:left; font-size:12px; color:var(--muted); font-weight:600; padding:9px 12px; border-bottom:1.5px solid var(--line); white-space:nowrap}
+.tbl td{padding:11px 12px; border-bottom:1px solid var(--line); vertical-align:middle}
+.tbl tr:hover td{background:#FBFAFF}
+.u-ava{width:30px; height:30px; border-radius:50%; display:inline-grid; place-items:center; font-size:15px; margin-right:8px; vertical-align:middle}
+select.role-pick{border:1px solid #DCDAF7; border-radius:8px; padding:4px 8px; background:#fff; min-width:110px}
+.code{font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#F3F1FB; padding:2px 8px; border-radius:6px}
+.badge{font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:999px; white-space:nowrap}
+.badge.ok{background:var(--ok-bg); color:var(--ok)}
+.badge.off{background:#F1F0F4; color:#9B97B0}
+.badge.warn{background:#FCF3E3; color:#8C5A10}
+.res-type{font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; letter-spacing:.5px}
+.rt-page{background:#EDEBFA; color:#4A41AE}
+.rt-work{background:#E5F7EE; color:#136B41}
+.rt-data{background:#FCF3E3; color:#8C5A10}
+
+/* ---------- 访问记录 ---------- */
+.log-item{display:flex; gap:12px; padding:11px 4px; border-bottom:1px dashed var(--line); font-size:13px; align-items:flex-start}
+.log-item:last-child{border-bottom:none}
+.log-time{font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:var(--muted); white-space:nowrap; padding-top:2px}
+.log-act{font-weight:600; white-space:nowrap}
+.log-act.allow{color:var(--ok)} .log-act.deny{color:var(--danger)}
+.log-desc{color:var(--muted)}
+
+/* ---------- toast ---------- */
+.toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(20px); opacity:0;
+  background:var(--ink); color:#fff; font-size:13.5px; padding:11px 22px; border-radius:999px; z-index:999;
+  transition:.25s; pointer-events:none; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--ok)} .toast.deny{background:var(--danger)}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+@media (max-width:640px){.topbar{padding:10px 14px} .wrap{padding:0 14px} .admin-body{padding:14px}}
+</style>
+</head>
+<body>
+
+<!-- ================= 主页面（模拟作品集，演示入口） ================= -->
+<div id="appMain">
+  <div class="topbar">
+    <a class="brand" href="javascript:void(0)">🤖 小盒子AI乐园</a>
+    <nav class="tabs">
+      <button class="tab active">AI 作品集</button>
+      <button class="tab">第4期AI沙龙</button>
+      <button class="tab">我的主页</button>
+    </nav>
+
+    <!-- 头像：权限管理入口在这里 -->
+    <div class="who" id="whoBox">
+      <button class="who-btn" id="whoBtn">
+        <span class="ava" id="whoAva">👧</span>
+        <span class="name" id="whoName">赵同学</span>
+        <span class="caret">▼</span>
+      </button>
+      <div class="menu" id="whoMenu">
+        <div class="menu-head">
+          <b id="menuName">赵同学</b>
+          <span id="menuRoles"></span>
+        </div>
+        <button class="menu-item"><span class="mi">🏠</span>我的主页</button>
+        <button class="menu-item"><span class="mi">⬆️</span>上传作品</button>
+        <div class="menu-sep"></div>
+        <button class="menu-item" id="miAdmin"><span class="mi">🛡️</span>权限管理 <span class="lock" id="miAdminLock"></span></button>
+        <div class="menu-sep"></div>
+        <button class="menu-item danger" id="miSwitch"><span class="mi">🔄</span>切换身份（演示）</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <span class="eyebrow">RBAC 原型 · 演示主页面</span>
+      <h1>AI <em>作品集</em></h1>
+      <p>这是作品集主页面。权限管理入口在 <b>右上角头像 → 菜单 → 🛡️ 权限管理</b>。不同身份看到的菜单不同：游客看到「登录」，学员看不到「权限管理」，管理员可见。点击右上角头像体验。</p>
+    </div>
+
+    <div class="note">💡 演示步骤：① 点右上角头像 →「切换身份」切到 🛡️ admin → 再点头像 → 点「权限管理」进入管理面板；② 在面板左侧切换「用户管理 / 角色管理 / 资源管理 / 访问记录」；③ 回主页面切换成「陈同学」，权限管理入口将消失（RBAC 生效）。</div>
+
+    <div class="work-grid" id="mockGrid"></div>
+  </div>
+</div>
+
+<!-- ================= 权限管理面板（全屏） ================= -->
+<div class="admin" id="adminPanel">
+  <div class="admin-top">
+    <button class="btn ghost sm" id="adminBack">← 返回作品集</button>
+    <span class="title">🛡️ 权限管理</span>
+    <span class="badge ok" style="margin-left:6px">RBAC</span>
+    <span style="margin-left:auto; font-size:12.5px; color:var(--muted)" id="adminWho"></span>
+  </div>
+
+  <div class="admin-body">
+    <div class="side" id="sideNav">
+      <button class="side-item active" data-panel="users"><span class="si">👥</span>用户管理<span class="cnt" id="cUsers"></span></button>
+      <button class="side-item" data-panel="roles"><span class="si">🎭</span>角色管理<span class="cnt" id="cRoles"></span></button>
+      <button class="side-item" data-panel="res"><span class="si">📦</span>资源管理<span class="cnt" id="cRes"></span></button>
+      <button class="side-item" data-panel="logs"><span class="si">📝</span>访问记录<span class="cnt" id="cLogs"></span></button>
+    </div>
+
+    <div class="main">
+      <!-- 用户管理 -->
+      <div class="panel active" id="panel-users">
+        <div class="hero" style="padding:6px 0 16px">
+          <h1>用户 <em>管理</em></h1>
+          <p>账号 → 角色绑定。角色决定权限；访问码仅用于登录，与权限无关。</p>
+        </div>
+        <div class="card">
+          <div class="hint" style="margin-bottom:8px">角色下拉可多选（按住 Ctrl/Cmd），改动即保存；admin 为内置账号不可删除</div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>用户</th><th>标识</th><th>角色</th><th>访问码</th><th>状态</th><th>作品</th><th style="text-align:right">操作</th></tr></thead>
+              <tbody id="userRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 角色管理 -->
+      <div class="panel" id="panel-roles">
+        <div class="hero" style="padding:6px 0 16px; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px">
+          <div>
+            <h1>角色 <em>管理</em></h1>
+            <p>角色 = 权限点集合。勾选矩阵立即生效；新建角色默认仅「浏览作品集」。</p>
+          </div>
+          <button class="btn primary" id="addRoleBtn">＋ 新建角色</button>
+        </div>
+        <div class="card">
+          <h3>权限矩阵</h3>
+          <div class="hint">行 = 权限点（操作），列 = 角色</div>
+          <div class="matrix-wrap" id="rolesMatrix"></div>
+        </div>
+        <div class="grid2" id="roleCards"></div>
+      </div>
+
+      <!-- 资源管理 -->
+      <div class="panel" id="panel-res">
+        <div class="hero" style="padding:6px 0 16px">
+          <h1>资源 <em>管理</em></h1>
+          <p>资源 = 被管控的对象（页面入口、作品、数据）。点击角色标签即可授予/收回该角色对此资源的访问权。</p>
+        </div>
+        <div class="card">
+          <h3>资源清单</h3>
+          <div class="hint">「页面」控制菜单可见性；「作品」控制试玩可见；「数据」控制接口访问</div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>资源</th><th>类型</th><th>可访问角色（点击切换）</th><th>状态</th></tr></thead>
+              <tbody id="resRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 访问记录 -->
+      <div class="panel" id="panel-logs">
+        <div class="hero" style="padding:6px 0 16px; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px">
+          <div>
+            <h1>访问 <em>记录</em></h1>
+            <p>审计日志：谁在什么时间做了什么，被放行还是被拦截。</p>
+          </div>
+          <button class="btn ghost sm" id="clearLogs">清空</button>
+        </div>
+        <div class="card" id="logCard"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ============ RBAC 数据模型 ============ */
+
+var PERM_GROUPS = [
+  { group: '作品操作', perms: [
+    { key: 'works:view',    name: '浏览作品集',    desc: '查看作品列表与主页' },
+    { key: 'works:upload',  name: '上传作品',      desc: '发布新作品' },
+    { key: 'works:del:own', name: '删除自己作品',  desc: '仅本人作品' },
+    { key: 'works:del:any', name: '删除任意作品',  desc: '管理员级' },
+    { key: 'works:audit',   name: '作品上架/下架', desc: '审核作品可见性' },
+  ]},
+  { group: '学员管理', perms: [
+    { key: 'stu:manage',  name: '学员账号管理',  desc: '新增学员/重置访问码/停用' },
+    { key: 'stats:view',  name: '数据统计查看',  desc: '作品量、活跃度等' },
+  ]},
+  { group: '系统管理', perms: [
+    { key: 'role:manage', name: '角色与授权管理', desc: '编辑矩阵、分配角色、资源配置' },
+    { key: 'log:view',    name: '访问记录查看',   desc: '审计日志' },
+  ]},
+];
+var ALL_PERMS = PERM_GROUPS.reduce(function (a, g) { return a.concat(g.perms.map(function (p) { return p.key; })); }, []);
+
+var DEFAULT_ROLES = [
+  { key: 'admin',   name: '超级管理员', builtin: true, perms: ALL_PERMS.slice() },
+  { key: 'teacher', name: '老师',       builtin: true, perms: ['works:view','works:upload','works:del:any','works:audit','stu:manage','stats:view'] },
+  { key: 'student', name: '学员',       builtin: true, perms: ['works:view','works:upload','works:del:own'] },
+  { key: 'guest',   name: '游客',       builtin: true, perms: ['works:view'] },
+];
+
+var DEFAULT_USERS = [
+  { py: 'admin',    name: 'admin',       ava: '🛡️', tint: '#EDE7FF', roles: ['admin'],   code: '——',    works: 0,  builtin: true },
+  { py: 'zhaoyihe', name: '赵同学',      ava: '👧', tint: '#FFE4EF', roles: ['student'], code: '111111', works: 10 },
+  { py: 'chen',     name: '陈同学',      ava: '🙋', tint: '#E4F4FB', roles: ['student'], code: '111111', works: 1 },
+  { py: 'he',       name: '何同学',      ava: '🤓', tint: '#FFE9D6', roles: ['student'], code: '111111', works: 1 },
+  { py: 'zheng',    name: '郑同学',      ava: '🧑', tint: '#EDE7FF', roles: ['student'], code: '111111', works: 1 },
+  { py: 'li',       name: '李同学',      ava: '👦', tint: '#DFF5EC', roles: ['student'], code: '111111', works: 1 },
+  { py: 'studio',   name: '小盒子工作室', ava: '🎮', tint: '#EDE7FF', roles: ['student'], code: '——',    works: 0, system: true },
+];
+
+/* 资源：type = page(页面入口) / work(作品) / data(数据接口) */
+var DEFAULT_RES = [
+  { key: 'page.gallery', name: '页面 · AI 作品集',   type: 'page', roles: ['admin','teacher','student','guest'], on: true },
+  { key: 'page.upload',  name: '页面 · 上传作品',     type: 'page', roles: ['admin','teacher','student'], on: true },
+  { key: 'page.home',    name: '页面 · 我的主页',     type: 'page', roles: ['admin','teacher','student'], on: true },
+  { key: 'page.admin',   name: '页面 · 权限管理入口', type: 'page', roles: ['admin'], on: true },
+  { key: 'work.pvz',     name: '作品 · 植物大战僵尸', type: 'work', roles: ['admin','teacher','student','guest'], on: true },
+  { key: 'work.snake',   name: '作品 · 贪吃蛇大作战', type: 'work', roles: ['admin','teacher','student'], on: true },
+  { key: 'data.stats',   name: '数据 · 统计看板',     type: 'data', roles: ['admin','teacher'], on: true },
+  { key: 'data.logs',    name: '数据 · 访问记录',     type: 'data', roles: ['admin'], on: true },
+];
+
+/* ============ 存储 / 工具 ============ */
+function load(k, fb) { try { var v = JSON.parse(localStorage.getItem('rbac2_' + k)); return v || fb; } catch (e) { return fb; } }
+function save(k, v) { try { localStorage.setItem('rbac2_' + k, JSON.stringify(v)); } catch (e) {} }
+var ST = {
+  roles: load('roles', DEFAULT_ROLES),
+  users: load('users', DEFAULT_USERS),
+  res:   load('res',   DEFAULT_RES),
+  logs:  load('logs', [
+    { t: '21:02', act: 'allow', who: 'admin', desc: '登录系统（超级管理员）' },
+    { t: '21:03', act: 'allow', who: 'admin', desc: '进入权限管理面板' },
+    { t: '21:04', act: 'deny',  who: '陈同学', desc: '尝试进入权限管理 → 拦截（资源「权限管理入口」未对学员开放）' },
+  ]),
+  cur: 'zhaoyihe',
+};
+function persist() { save('roles', ST.roles); save('users', ST.users); save('res', ST.res); save('logs', ST.logs); }
+
+function $(s) { return document.querySelector(s); }
+function $$(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+  return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function roleOf(key) { return ST.roles.filter(function (r) { return r.key === key; })[0]; }
+function curUser() { return ST.cur === 'guest' || ST.cur === 'teacher' ? null : ST.users.filter(function (u) { return u.py === ST.cur; })[0]; }
+function curRoles() {
+  if (ST.cur === 'guest') return ['guest'];
+  if (ST.cur === 'teacher') return ['teacher'];
+  var u = curUser(); return u ? u.roles : ['guest'];
+}
+function curPerms() {
+  var set = {};
+  curRoles().forEach(function (rk) { var r = roleOf(rk); if (r) r.perms.forEach(function (p) { set[p] = 1; }); });
+  return set;
+}
+function can(perm) { return !!curPerms()[perm]; }
+function resVisible(resKey) {
+  var r = ST.res.filter(function (x) { return x.key === resKey; })[0];
+  if (!r) return true;
+  if (!r.on) return false;
+  return r.roles.some(function (k) { return curRoles().indexOf(k) >= 0; });
+}
+function curName() {
+  if (ST.cur === 'guest') return '游客';
+  if (ST.cur === 'teacher') return '王老师（示例）';
+  var u = curUser(); return u ? u.name : '游客';
+}
+function toast(msg, cls) {
+  var t = $('#toast'); t.textContent = msg; t.className = 'toast show ' + (cls || '');
+  clearTimeout(t._h); t._h = setTimeout(function () { t.className = 'toast ' + (cls || ''); }, 2300);
+}
+function log(act, desc) {
+  ST.logs.unshift({ t: new Date().toTimeString().slice(0, 5), act: act, who: curName(), desc: desc });
+  if (ST.logs.length > 80) ST.logs.length = 80;
+  persist(); renderLogs(); renderCounts();
+}
+function roleBadge(rk, extra) {
+  var r = roleOf(rk); if (!r) return '';
+  var cls = { admin: 'role-admin', teacher: 'role-teacher', student: 'role-student', guest: 'role-guest' }[r.key] || 'role-custom';
+  return '<span class="role-chip ' + cls + (extra || '') + '" data-rolename="' + esc(r.name) + '">' + esc(r.name) + '</span>';
+}
+function permName(key) {
+  for (var i = 0; i < PERM_GROUPS.length; i++) {
+    var p = PERM_GROUPS[i].perms.filter(function (x) { return x.key === key; })[0];
+    if (p) return p.name;
+  }
+  return key;
+}
+
+/* ============ 渲染：主页面 ============ */
+var MOCK_WORKS = [
+  { t: '植物大战僵尸', s: '赵同学', e: '🌻', res: 'work.pvz', tint: ['#FFF3D6','#FFE3A8'] },
+  { t: '边境行动', s: '赵同学', e: '🎯', res: null, tint: ['#EDE7FF','#CFC4FF'] },
+  { t: '贪吃蛇大作战', s: '陈同学', e: '🐍', res: 'work.snake', tint: ['#E5F7EE','#BEE7D2'] },
+  { t: 'AI 躲猫', s: '赵同学', e: '👻', res: null, tint: ['#E4F4FB','#BEE3F0'] },
+];
+
+function renderMain() {
+  var u = curUser();
+  $('#whoAva').textContent = u ? u.ava : (ST.cur === 'teacher' ? '👩‍🏫' : '👤');
+  $('#whoName').textContent = curName();
+  $('#menuName').textContent = curName();
+  $('#menuRoles').innerHTML = curRoles().map(roleBadge).join(' ');
+
+  // 权限管理入口：RBAC 控制（资源可见 + role:manage 权限）
+  var adminVisible = can('role:manage') && resVisible('page.admin');
+  $('#miAdmin').classList.toggle('disabled', !adminVisible);
+  $('#miAdminLock').textContent = adminVisible ? '' : '🔒 无权限';
+
+  // 作品卡片按资源配置显示
+  $('#mockGrid').innerHTML = MOCK_WORKS.map(function (w) {
+    var vis = w.res ? resVisible(w.res) : true;
+    return '<div class="work">' +
+      '<div class="cover" style="background:linear-gradient(140deg,' + w.tint[0] + ',' + w.tint[1] + ')">' + w.e + '</div>' +
+      '<div class="body"><b>' + esc(w.t) + (vis ? '' : ' <span class="res-lock">🔒 受限</span>') + '</b>' +
+      '<span>' + esc(w.s) + ' · ' + (vis ? '可试玩' : '当前角色不可访问') + '</span></div></div>';
+  }).join('');
+}
+
+/* ============ 渲染：管理面板 ============ */
+function renderUsers() {
+  $('#userRows').innerHTML = ST.users.map(function (u) {
+    var opts = ST.roles.map(function (r) {
+      return '<option value="' + esc(r.key) + '"' + (u.roles.indexOf(r.key) >= 0 ? ' selected' : '') + '>' + esc(r.name) + '</option>';
+    }).join('');
+    return '<tr>' +
+      '<td><span class="u-ava" style="background:' + u.tint + '">' + esc(u.ava) + '</span><b>' + esc(u.name) + '</b>' +
+        (u.system ? ' <span class="badge off">系统</span>' : '') + '</td>' +
+      '<td><span class="code">' + esc(u.py) + '</span></td>' +
+      '<td>' + (u.builtin ? u.roles.map(roleBadge).join('') :
+        '<select class="role-pick" multiple size="' + Math.min(3, ST.roles.length) + '" data-user="' + esc(u.py) + '">' + opts + '</select>') + '</td>' +
+      '<td><span class="code">' + esc(u.code) + '</span></td>' +
+      '<td><span class="badge ok">启用</span></td>' +
+      '<td>' + u.works + '</td>' +
+      '<td style="text-align:right">' + (u.builtin ? '—' :
+        '<button class="btn ghost sm" data-reset="' + esc(u.py) + '">重置码</button> ' +
+        '<button class="btn danger sm" data-off="' + esc(u.py) + '">停用</button>') + '</td></tr>';
+  }).join('');
+}
+
+function matrixHTML() {
+  var head = '<table class="matrix"><thead><tr><th style="text-align:left">权限点</th>' +
+    ST.roles.map(function (r) { return '<th>' + esc(r.name) + '</th>'; }).join('') + '</tr></thead><tbody>';
+  var body = '';
+  PERM_GROUPS.forEach(function (g) {
+    body += '<tr class="pgroup"><th colspan="' + (ST.roles.length + 1) + '">' + esc(g.group) + '</th></tr>';
+    g.perms.forEach(function (p) {
+      body += '<tr><th>' + esc(p.name) + '<span class="pdesc">' + esc(p.desc) + '</span></th>';
+      ST.roles.forEach(function (r) {
+        var on = r.perms.indexOf(p.key) >= 0;
+        body += '<td><input type="checkbox" data-role="' + esc(r.key) + '" data-perm="' + esc(p.key) + '"' + (on ? ' checked' : '') + '></td>';
+      });
+      body += '</tr>';
+    });
+  });
+  return head + body + '</tbody></table>';
+}
+
+function renderRoles() {
+  $('#rolesMatrix').innerHTML = matrixHTML();
+  $('#roleCards').innerHTML = ST.roles.map(function (r) {
+    return '<div class="card"><h3>' + esc(r.name) + (r.builtin ? ' <span class="badge off" style="margin-left:6px">内置</span>' : '') + '</h3>' +
+      '<div class="hint">' + r.perms.length + ' / ' + ALL_PERMS.length + ' 项权限</div>' +
+      r.perms.map(function (p) { return '<span class="perm-chip">✓ ' + esc(permName(p)) + '</span>'; }).join('') +
+      (!r.builtin ? '<div style="margin-top:12px"><button class="btn danger sm" data-delrole="' + esc(r.key) + '">删除角色</button></div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+function renderRes() {
+  var typeCls = { page: ['rt-page', '页面'], work: ['rt-work', '作品'], data: ['rt-data', '数据'] };
+  $('#resRows').innerHTML = ST.res.map(function (r) {
+    return '<tr>' +
+      '<td><b>' + esc(r.name) + '</b></td>' +
+      '<td><span class="res-type ' + typeCls[r.type][0] + '">' + typeCls[r.type][1] + '</span></td>' +
+      '<td>' + ST.roles.map(function (rk) {
+        var on = r.roles.indexOf(rk.key) >= 0;
+        var b = roleBadge(rk.key, on ? '' : ' off');
+        return b.replace('data-rolename', 'data-res="' + esc(r.key) + '" data-roleres="' + esc(rk.key) + '"');
+      }).join('') + '</td>' +
+      '<td>' + (r.on ? '<span class="badge ok">已上架</span>' : '<span class="badge warn">已下架</span>') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function renderLogs() {
+  var card = $('#logCard');
+  if (!can('log:view')) { card.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">🔒 当前身份无「访问记录查看」权限（log:view）</div>'; return; }
+  card.innerHTML = ST.logs.map(function (l) {
+    return '<div class="log-item">' +
+      '<span class="log-time">' + esc(l.t) + '</span>' +
+      '<span class="log-act ' + l.act + '">' + (l.act === 'allow' ? '✓ 放行' : '✕ 拦截') + '</span>' +
+      '<span><b>' + esc(l.who) + '</b> <span class="log-desc">' + esc(l.desc) + '</span></span></div>';
+  }).join('') || '<div style="padding:30px;text-align:center;color:var(--muted)">暂无记录</div>';
+}
+
+function renderCounts() {
+  $('#cUsers').textContent = ST.users.length;
+  $('#cRoles').textContent = ST.roles.length;
+  $('#cRes').textContent = ST.res.length;
+  $('#cLogs').textContent = ST.logs.length;
+  $('#adminWho').textContent = '当前：' + curName() + ' · ' + curRoles().map(function (k) { return (roleOf(k) || {}).name || k; }).join('、');
+}
+
+function renderAll() { renderMain(); renderUsers(); renderRoles(); renderRes(); renderLogs(); renderCounts(); }
+
+/* ============ 交互 ============ */
+// 头像下拉
+$('#whoBtn').addEventListener('click', function (e) {
+  e.stopPropagation();
+  $('#whoBox').classList.toggle('open');
+});
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('#whoBox')) $('#whoBox').classList.remove('open');
+});
+
+// 菜单项
+$('#miAdmin').addEventListener('click', function () {
+  $('#whoBox').classList.remove('open');
+  if (!can('role:manage')) { toast('✕ 拦截：缺少权限 role:manage（角色与授权管理）', 'deny'); log('deny', '尝试进入权限管理 → 拦截（缺少 role:manage）'); return; }
+  if (!resVisible('page.admin')) { toast('✕ 拦截：资源「权限管理入口」未对当前角色开放', 'deny'); log('deny', '尝试进入权限管理 → 拦截（资源未开放）'); return; }
+  $('#adminPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  toast('已进入权限管理面板', 'ok');
+  log('allow', '进入权限管理面板');
+});
+$('#miSwitch').addEventListener('click', function () {
+  $('#whoBox').classList.remove('open');
+  var order = ['guest','zhaoyihe','chen','teacher','admin'];
+  var i = order.indexOf(ST.cur);
+  ST.cur = order[(i + 1) % order.length];
+  var labels = { guest: '👤 游客', zhaoyihe: '👧 赵同学', chen: '🙋 陈同学', teacher: '👩‍🏫 老师', admin: '🛡️ admin' };
+  persist(); renderAll();
+  toast('已切换身份：' + labels[ST.cur], 'ok');
+});
+$$('.menu-item').forEach(function (m) {
+  if (m.id === 'miAdmin' || m.id === 'miSwitch') return;
+  m.addEventListener('click', function () {
+    $('#whoBox').classList.remove('open');
+    toast('「' + m.textContent.trim() + '」在真实系统中跳转对应页面（原型演示）', 'ok');
+  });
+});
+
+// 管理面板：返回 / 侧栏
+$('#adminBack').addEventListener('click', function () {
+  $('#adminPanel').classList.remove('open');
+  document.body.style.overflow = '';
+});
+$$('#sideNav .side-item').forEach(function (s) {
+  s.addEventListener('click', function () {
+    $$('#sideNav .side-item').forEach(function (x) { x.classList.toggle('active', x === s); });
+    $$('.panel').forEach(function (p) { p.classList.toggle('active', p.id === 'panel-' + s.dataset.panel); });
+    $('#adminPanel').scrollTop = 0;
+  });
+});
+
+// 权限矩阵勾选 / 用户角色多选
+document.addEventListener('change', function (e) {
+  var cb = e.target.closest('input[type=checkbox][data-role]');
+  if (cb) {
+    var r = roleOf(cb.dataset.role); if (!r) return;
+    var p = cb.dataset.perm, i = r.perms.indexOf(p);
+    if (cb.checked && i < 0) r.perms.push(p);
+    if (!cb.checked && i >= 0) r.perms.splice(i, 1);
+    persist(); renderMain(); renderRoles();
+    toast((cb.checked ? '已授予「' + permName(p) + '」→ ' : '已收回「' + permName(p) + '」← ') + r.name, 'ok');
+    log('allow', (cb.checked ? '授予' : '收回') + '角色「' + r.name + '」权限：' + permName(p));
+    return;
+  }
+  var sel = e.target.closest('select.role-pick[data-user]');
+  if (sel) {
+    var u = ST.users.filter(function (x) { return x.py === sel.dataset.user; })[0];
+    if (!u) return;
+    var picked = Array.prototype.slice.call(sel.selectedOptions).map(function (o) { return o.value; });
+    if (!picked.length) { toast('至少保留一个角色', 'deny'); renderUsers(); return; }
+    u.roles = picked; persist(); renderAll();
+    toast('已更新 ' + u.name + ' 的角色', 'ok');
+    log('allow', '将「' + u.name + '」的角色调整为：' + picked.map(function (k) { return (roleOf(k) || {}).name || k; }).join('、'));
+  }
+});
+
+// 资源角色切换（点击 chip）等
+document.addEventListener('click', function (e) {
+  var chip = e.target.closest('.role-chip[data-res]');
+  if (chip) {
+    var r = ST.res.filter(function (x) { return x.key === chip.dataset.res; })[0];
+    var rk = chip.dataset.roleres, i = r.roles.indexOf(rk);
+    if (i >= 0) { r.roles.splice(i, 1); toast('已收回「' + (roleOf(rk) || {}).name + '」对「' + r.name + '」的访问权', 'ok'); }
+    else { r.roles.push(rk); toast('已授予「' + (roleOf(rk) || {}).name + '」访问「' + r.name + '」', 'ok'); }
+    persist(); renderRes(); renderMain();
+    log('allow', '资源「' + r.name + '」' + (i >= 0 ? '收回' : '授予') + '角色：' + (roleOf(rk) || {}).name);
+    return;
+  }
+  var del = e.target.closest('[data-delrole]');
+  if (del) {
+    var key = del.dataset.delrole;
+    ST.roles = ST.roles.filter(function (x) { return x.key !== key; });
+    ST.users.forEach(function (u) { u.roles = u.roles.filter(function (x) { return x !== key; }); });
+    ST.res.forEach(function (r) { r.roles = r.roles.filter(function (x) { return x !== key; }); });
+    persist(); renderAll();
+    toast('角色已删除', 'ok'); log('allow', '删除角色 ' + key);
+    return;
+  }
+  var rs = e.target.closest('[data-reset]');
+  if (rs) { toast('✓ 已重置 ' + rs.dataset.reset + ' 的访问码（演示）', 'ok'); log('allow', '重置 ' + rs.dataset.reset + ' 的访问码'); return; }
+  var off = e.target.closest('[data-off]');
+  if (off) { toast('✓ 已停用 ' + off.dataset.off + '（演示）', 'ok'); log('allow', '停用账号 ' + off.dataset.off); return; }
+});
+
+$('#clearLogs').addEventListener('click', function () { ST.logs = []; persist(); renderLogs(); renderCounts(); toast('访问记录已清空', 'ok'); });
+
+$('#addRoleBtn').addEventListener('click', function () {
+  var name = prompt('新角色名称（如：助教、家长观察员）');
+  if (!name) return;
+  var key = 'c' + Date.now().toString(36);
+  ST.roles.push({ key: key, name: name, builtin: false, perms: ['works:view'] });
+  persist(); renderAll();
+  toast('已创建角色「' + name + '」，默认仅可浏览作品集', 'ok');
+  log('allow', '新建角色「' + name + '」');
+});
+
+/* ============ 启动 ============ */
+renderAll();
+</script>
+</body>
+</html>

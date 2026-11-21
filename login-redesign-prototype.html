@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>登录界面重设计原型 · 小盒子AI乐园</title>
+<style>
+:root{
+  --ink:#1c1b2e; --muted:#6f6d86; --line:#e9e7f4;
+  --brand:#534AB7; --brand2:#7F77DD; --brand-soft:#F1F0FE;
+  --bg:#f6f5fb; --card:#fff; --warn:#c8271c; --ok:#0F6E56;
+  --radius:16px; --shadow:0 10px 30px rgba(28,27,46,.08);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI","Microsoft YaHei",sans-serif;
+  font-size:14px; line-height:1.6;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:34px 22px 70px}
+
+/* ---------- 说明区 ---------- */
+.proto-head{margin-bottom:26px}
+.proto-head .eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--brand);background:var(--brand-soft);padding:4px 12px;border-radius:999px;margin-bottom:12px}
+.proto-head h1{margin:0 0 8px;font-size:26px;letter-spacing:-.3px}
+.proto-head p{margin:0;color:var(--muted);font-size:13.5px;max-width:640px}
+.proto-note{margin-top:14px;background:#fff;border:1px dashed #c9c4f2;border-radius:12px;padding:12px 16px;font-size:12.5px;color:#4a4870}
+.proto-note b{color:var(--brand)}
+
+/* ---------- 状态切换 ---------- */
+.state-bar{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 8px}
+.state-bar button{
+  font:inherit;font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:var(--muted);
+}
+.state-bar button.on{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(83,74,183,.25)}
+
+/* ---------- 登录卡片舞台 ---------- */
+.stage{
+  min-height:560px; border-radius:22px; position:relative; overflow:hidden;
+  background:
+    radial-gradient(900px 420px at 85% -10%, #DDD8FA 0%, transparent 62%),
+    radial-gradient(700px 380px at 8% 108%, #E4E0FB 0%, transparent 58%),
+    #f0eefb;
+  display:grid; place-items:center; padding:56px 20px;
+  border:1px solid var(--line);
+}
+.stage-label{position:absolute;top:14px;left:18px;font-size:11.5px;font-weight:700;letter-spacing:1.2px;color:#8d88c9}
+
+/* ---------- 新版登录卡片 ---------- */
+.login-card{
+  width:400px; max-width:100%; background:var(--card);
+  border:1px solid var(--line); border-radius:20px;
+  box-shadow:0 24px 60px rgba(38,32,92,.16);
+  padding:34px 34px 28px;
+  animation:pop .35s cubic-bezier(.2,.9,.3,1.2);
+}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.login-brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:22px;text-align:center}
+.login-logo{
+  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:30px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 10px 24px rgba(83,74,183,.35);
+}
+.login-brand h2{margin:0;font-size:19px;letter-spacing:.2px}
+.login-brand p{margin:0;font-size:12.5px;color:var(--muted)}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:#4a4870;margin-bottom:6px}
+.inp-wrap{position:relative}
+.inp-wrap .icon{
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:15px;color:#a5a1c4;pointer-events:none;
+}
+.inp-wrap input{
+  width:100%;font:inherit;font-size:14.5px;color:var(--ink);
+  background:#FBFAFF;border:1.5px solid #DCDAF7;border-radius:12px;
+  padding:11px 42px 11px 40px;outline:none;transition:.15s;
+}
+.inp-wrap input::placeholder{color:#b6b3cc}
+.inp-wrap input:focus{border-color:var(--brand2);background:#fff;box-shadow:0 0 0 4px rgba(127,119,221,.14)}
+.inp-wrap input.err{border-color:var(--warn);background:#FEF7F6}
+.eye{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  border:none;background:none;cursor:pointer;font-size:16px;padding:6px 8px;border-radius:8px;color:#a5a1c4;line-height:1;
+}
+.eye:hover{background:var(--brand-soft);color:var(--brand)}
+
+.login-row{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 18px;font-size:12.5px}
+.remember{display:flex;align-items:center;gap:7px;color:var(--muted);cursor:pointer;user-select:none}
+.remember input{width:15px;height:15px;accent-color:var(--brand);cursor:pointer}
+.forgot{color:var(--brand);text-decoration:none;font-weight:600}
+.forgot:hover{text-decoration:underline;text-underline-offset:3px}
+
+.btn-login{
+  width:100%;font:inherit;font-size:15px;font-weight:700;color:#fff;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  border:none;border-radius:12px;padding:13px 0;cursor:pointer;
+  box-shadow:0 10px 24px rgba(83,74,183,.32);transition:.15s;
+}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(83,74,183,.4)}
+.btn-login:active{transform:none}
+.btn-login[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+
+.err-bar{
+  display:none;align-items:center;gap:8px;margin:0 0 16px;
+  background:#FEF2F0;border:1px solid #f5c9c2;color:var(--warn);
+  font-size:12.5px;font-weight:600;padding:9px 13px;border-radius:10px;
+}
+.err-bar.show{display:flex;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.login-foot{
+  margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+  text-align:center;font-size:12px;color:var(--muted);
+}
+.login-foot .demo{color:#8d88b8}
+.login-foot .demo code{background:var(--brand-soft);color:#4A41AE;padding:1px 7px;border-radius:6px;font-size:11.5px}
+
+/* 登录成功态 */
+.success-card{width:400px;max-width:100%;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 60px rgba(38,32,92,.16);padding:38px 34px;text-align:center;animation:pop .35s cubic-bezier(.2,.9,.3,1.2)}
+.success-ring{width:64px;height:64px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;font-size:32px;background:#E7F6F0;border:2px solid #BFE7D8;animation:ring .5s .1s cubic-bezier(.2,.9,.3,1.4) backwards}
+@keyframes ring{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.success-card h3{margin:0 0 6px;font-size:18px}
+.success-card p{margin:0 0 20px;font-size:13px;color:var(--muted)}
+.success-user{display:flex;align-items:center;gap:10px;background:var(--brand-soft);border-radius:12px;padding:10px 14px;margin-bottom:20px;font-size:13.5px;font-weight:600;color:#3C3489}
+.success-user .ava{width:32px;height:32px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:17px}
+
+/* 忘记访问码 */
+.forgot-tip{font-size:12.5px;color:var(--muted);background:var(--brand-soft);border-radius:10px;padding:10px 14px;margin:0 0 16px;display:flex;gap:8px;align-items:flex-start}
+.forgot-tip .ic{flex:none;font-size:15px}
+
+/* 手机预览 */
+.mobile-stage{display:none}
+@media (max-width:560px){
+  .stage{min-height:520px}
+  .login-card,.success-card{padding:28px 22px 22px}
+}
+
+/* ---------- 对比说明 ---------- */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+.cmp-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:12.5px;color:var(--muted)}
+.cmp-card h4{margin:0 0 8px;font-size:13.5px;color:var(--ink)}
+.cmp-card ul{margin:0;padding-left:18px}
+.cmp-card li{margin:3px 0}
+@media (max-width:720px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="proto-head">
+    <span class="eyebrow">LOGIN REDESIGN · 原型</span>
+    <h1>登录界面重设计 —— 标准账号密码登录</h1>
+    <p>替换现有「选名字卡片 + 访问码」弹窗，改为通用的「用户名 + 密码」登录表单。沿用站点紫色视觉风格，支持密码可见切换、记住登录、错误提示、忘记密码引导。</p>
+    <div class="proto-note">
+      <b>交互演示：</b>下方切换查看 5 种状态。登录态可输入 <b>admin / 111111</b> 模拟登录成功；其他任意账号密码会演示「账号或密码不对」的错误抖动提示。
+    </div>
+  </div>
+
+  <div class="state-bar" id="stateBar">
+    <button class="on" data-st="login">① 默认登录</button>
+    <button data-st="error">② 密码错误</button>
+    <button data-st="loading">③ 登录中</button>
+    <button data-st="success">④ 登录成功</button>
+    <button data-st="forgot">⑤ 忘记密码</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <span class="stage-label" id="stageLabel">STATE ① · 默认登录</span>
+
+    <!-- ①②③⑤ 登录卡片（复用） -->
+    <div class="login-card" id="cardLogin">
+      <div class="login-brand">
+        <div class="login-logo">🤖</div>
+        <h2>登录小盒子AI乐园</h2>
+        <p id="brandSub">输入你的账号和密码，进入个人主页</p>
+      </div>
+
+      <div class="err-bar" id="errBar"><span>⚠️</span><span id="errText">账号或密码不对，再试一次</span></div>
+
+      <div class="forgot-tip" id="forgotTip" style="display:none">
+        <span class="ic">💡</span>
+        <span>密码由老师在「权限管理 → 用户管理」里设置。忘了也没关系，课上找老师重置一个新密码就可以啦。</span>
+      </div>
+
+      <div class="field">
+        <label for="fUser">账号</label>
+        <div class="inp-wrap">
+          <span class="icon">👤</span>
+          <input id="fUser" type="text" placeholder="请输入账号，如：陈同学" autocomplete="username" value="陈同学">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="fCode">密码</label>
+        <div class="inp-wrap">
+          <span class="icon">🔒</span>
+          <input id="fCode" type="password" placeholder="6 位数字密码" autocomplete="current-password" maxlength="6" inputmode="numeric" value="111111">
+          <button class="eye" id="eyeBtn" type="button" title="显示/隐藏密码">👁</button>
+        </div>
+      </div>
+
+      <div class="login-row">
+        <label class="remember"><input type="checkbox" checked>30 天内自动登录</label>
+        <a class="forgot" href="javascript:void(0)" id="forgotLink">忘记密码？</a>
+      </div>
+
+      <button class="btn-login" id="loginBtn">登 录</button>
+
+      <div class="login-foot">
+        还没有账号？课上找老师开通 · 浏览作品无需登录
+      </div>
+    </div>
+
+    <!-- ④ 登录成功 -->
+    <div class="success-card" id="cardSuccess" style="display:none">
+      <div class="success-ring">✅</div>
+      <h3>登录成功</h3>
+      <p>欢迎回来，正在进入你的个人主页…</p>
+      <div class="success-user"><span class="ava">🛡️</span>管理员 · 超级管理员</div>
+      <button class="btn-login" onclick="setState('login')">再看一次登录页</button>
+    </div>
+  </div>
+
+  <div class="compare">
+    <div class="cmp-card">
+      <h4>旧版（现状）</h4>
+      <ul>
+        <li>先在弹窗里点选自己的「名字卡片」</li>
+        <li>再输入 6 位访问码</li>
+        <li>账号多时要翻找卡片，不直观</li>
+        <li>没有密码遮蔽 / 记住登录等常规能力</li>
+      </ul>
+    </div>
+    <div class="cmp-card">
+      <h4>新版（本原型）</h4>
+      <ul>
+        <li>标准「账号 + 密码」两栏表单，任何设备都熟悉</li>
+        <li>密码默认密文显示，👁 一键切换明文</li>
+        <li>「30 天内自动登录」勾选（对应现有 token 有效期）</li>
+        <li>错误红条 + 抖动提示；忘记访问码有引导说明</li>
+        <li>学员、老师、admin 统一入口，不再区分界面</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var state = 'login';
+var labels = {
+  login:'STATE ① · 默认登录',
+  error:'STATE ② · 密码错误（红条 + 抖动 + 输入框标红）',
+  loading:'STATE ③ · 登录中（按钮禁用防重复提交）',
+  success:'STATE ④ · 登录成功（后跳转个人主页）',
+  forgot:'STATE ⑤ · 忘记密码（引导找老师重置）'
+};
+function setState(st){
+  state = st;
+  document.querySelectorAll('#stateBar button').forEach(function(b){ b.classList.toggle('on', b.dataset.st===st); });
+  document.getElementById('stageLabel').textContent = labels[st];
+  var login = document.getElementById('cardLogin');
+  var succ  = document.getElementById('cardSuccess');
+  var err   = document.getElementById('errBar');
+  var user  = document.getElementById('fUser');
+  var code  = document.getElementById('fCode');
+  var btn   = document.getElementById('loginBtn');
+  var tip   = document.getElementById('forgotTip');
+  var sub   = document.getElementById('brandSub');
+  login.style.display=''; succ.style.display='none';
+  err.classList.remove('show');
+  user.classList.remove('err'); code.classList.remove('err');
+  btn.disabled=false; btn.textContent='登 录';
+  tip.style.display='none';
+  sub.textContent='输入你的账号和密码，进入个人主页';
+  user.value='陈同学'; code.value='111111';
+  if(st==='error'){
+    err.classList.add('show');
+    document.getElementById('errText').textContent='账号或密码不对，请再试一次';
+    user.classList.add('err'); code.classList.add('err');
+    code.value='123456';
+  } else if(st==='loading'){
+    btn.disabled=true; btn.textContent='登录中…';
+  } else if(st==='success'){
+    login.style.display='none'; succ.style.display='';
+  } else if(st==='forgot'){
+    tip.style.display='flex';
+    sub.textContent='密码找回来很简单';
+  }
+}
+document.getElementById('stateBar').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(b) setState(b.dataset.st);
+});
+
+/* 密码可见切换 */
+document.getElementById('eyeBtn').addEventListener('click', function(){
+  var i = document.getElementById('fCode');
+  i.type = i.type==='password' ? 'text' : 'password';
+  this.textContent = i.type==='password' ? '👁' : '🙈';
+});
+
+/* 忘记链接 */
+document.getElementById('forgotLink').addEventListener('click', function(){ setState('forgot'); });
+
+/* 模拟登录 */
+document.getElementById('loginBtn').addEventListener('click', function(){
+  var u = document.getElementById('fUser').value.trim();
+  var c = document.getElementById('fCode').value.trim();
+  var err = document.getElementById('errBar');
+  var et = document.getElementById('errText');
+  this.disabled=true; this.textContent='登录中…';
+  var self=this;
+  setTimeout(function(){
+    if(u==='admin' && c==='111111'){ setState('success'); }
+    else{
+      err.classList.add('show');
+      et.textContent = !u ? '请输入账号' : (!/^\d{6}$/.test(c) ? '密码是 6 位数字' : '账号或密码不对，请再试一次');
+      document.getElementById('fUser').classList.toggle('err', !u);
+      document.getElementById('fCode').classList.toggle('err', !!u && !/^\d{6}$/.test(c) || (!!u && /^\d{6}$/.test(c) && u!=='admin'));
+      self.disabled=false; self.textContent='登 录';
+    }
+  }, 700);
+});
+
+/* 回车提交 */
+['fUser','fCode'].forEach(function(id){
+  document.getElementById(id).addEventListener('keydown', function(e){
+    if(e.key==='Enter') document.getElementById('loginBtn').click();
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 赛事 · 小盒子AI乐园（原型）</title>
+<style>
+:root{
+  --ink:#1c1b2e; --muted:#6f6d86; --line:#e9e7f4;
+  --brand:#534AB7; --brand2:#7F77DD; --brand-soft:#F1F0FE;
+  --bg:#f6f5fb; --card:#fff; --ok:#0F6E56; --warn:#c8271c; --amber:#8A5A00;
+  --radius:16px; --shadow:0 10px 30px rgba(28,27,46,.07);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI","Microsoft YaHei",sans-serif;
+  font-size:14px;line-height:1.6;}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+
+/* ---------- 顶部导航（展示 Tab 位置） ---------- */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1120px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;color:#3C3489;letter-spacing:.3px;white-space:nowrap}
+.nav{display:flex;align-items:center;gap:8px}
+.tab{font-size:13px;padding:7px 15px;border-radius:999px;border:1px solid var(--line);background:#F1F0FE;color:#4A41AE;cursor:pointer;font-weight:600;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(83,74,183,.28)}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:13px}
+.who .ava{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);display:grid;place-items:center;font-size:14px}
+.proto-flag{margin-left:10px;font-size:11px;font-weight:700;letter-spacing:1px;color:#8d88c9;border:1px dashed #c9c4f2;border-radius:999px;padding:2px 9px}
+
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px 70px}
+
+/* ---------- Hero ---------- */
+.hero{padding:36px 0 22px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--brand);background:var(--brand-soft);padding:4px 12px;border-radius:999px;margin-bottom:13px}
+.hero h1{margin:0 0 9px;font-size:29px;line-height:1.3;letter-spacing:-.3px}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero p{margin:0 0 18px;font-size:14.5px;color:var(--muted);max-width:560px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:13.5px;font-weight:600;
+  padding:10px 18px;border-radius:11px;border:1px solid transparent;cursor:pointer;transition:.16s;white-space:nowrap}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 8px 20px rgba(83,74,183,.28)}
+.btn.primary:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(83,74,183,.36)}
+.btn.ghost{background:#fff;border-color:var(--line);color:#4a4870}
+.btn.ghost:hover{border-color:#cfc9f2;background:#fbfaff}
+.btn.sm{padding:7px 13px;font-size:12.5px;border-radius:9px}
+.stats{display:flex;gap:10px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 18px;min-width:92px;text-align:center}
+.stat b{display:block;font-size:22px;line-height:1.2;color:var(--brand)}
+.stat span{font-size:11.5px;color:var(--muted)}
+
+/* ---------- 主推赛事 ---------- */
+.feature{
+  position:relative;overflow:hidden;border-radius:20px;padding:26px 28px;margin:6px 0 26px;
+  background:linear-gradient(120deg,#3C3489 0%,#534AB7 52%,#7F77DD 100%);color:#fff;
+  box-shadow:0 18px 40px rgba(60,52,137,.28);
+}
+.feature::after{content:"";position:absolute;right:-60px;top:-70px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.28),transparent 68%)}
+.feature-in{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center}
+.f-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:1px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);padding:3px 11px;border-radius:999px;margin-bottom:12px}
+.feature h2{margin:0 0 8px;font-size:23px;letter-spacing:-.2px}
+.feature p{margin:0 0 14px;font-size:13.5px;color:rgba(255,255,255,.85);max-width:560px}
+.f-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:rgba(255,255,255,.9)}
+.f-meta b{color:#fff}
+.f-side{text-align:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:16px;padding:14px 18px;min-width:150px}
+.f-side .cd{font-family:ui-monospace,Menlo,monospace;font-size:22px;font-weight:700;letter-spacing:1px}
+.f-side small{display:block;font-size:11.5px;color:rgba(255,255,255,.8);margin-bottom:6px}
+.f-side .btn{margin-top:12px;background:#fff;color:#3C3489;font-weight:700;width:100%}
+.f-side .btn:hover{transform:translateY(-1px)}
+
+/* ---------- 筛选 ---------- */
+.filterbar{display:flex;flex-direction:column;gap:10px;margin:0 0 20px}
+.frow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.frow .label{font-size:12px;color:var(--muted);font-weight:600;min-width:44px}
+.chip{font-size:12.5px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#4a4870;cursor:pointer;font-weight:500}
+.chip:hover{border-color:#cfc9f2;background:#fbfaff}
+.chip.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(83,74,183,.24)}
+.chip em{font-style:normal;opacity:.7;margin-left:4px}
+.search{margin-left:auto;position:relative}
+.search input{font:inherit;font-size:13px;padding:8px 13px 8px 34px;border:1px solid var(--line);border-radius:999px;background:#fff;outline:none;width:210px}
+.search input:focus{border-color:#a9a2ea;box-shadow:0 0 0 3px rgba(127,119,221,.14)}
+.search span{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#b0aec4}
+
+/* ---------- 赛事卡 ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.event{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  display:flex;flex-direction:column;transition:.18s;cursor:pointer}
+.event:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(28,27,46,.1);border-color:#d9d4f5}
+.e-cover{position:relative;height:104px;display:grid;place-items:center;font-size:38px}
+.e-status{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.3px}
+.st-open{background:#E7F6F0;color:var(--ok);border:1px solid #BFE7D8}
+.st-live{background:#FFF3E0;color:var(--amber);border:1px solid #F5D9A8}
+.st-end{background:#F0EFF6;color:#8a87a8;border:1px solid #E2E0EE}
+.e-type{position:absolute;top:10px;right:10px;font-size:11px;color:#4a4870;background:rgba(255,255,255,.86);padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.6)}
+.e-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.e-body h3{margin:0;font-size:15.5px;line-height:1.4}
+.e-body p{margin:0;font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+.e-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;color:#4A41AE;background:var(--brand-soft);padding:2px 8px;border-radius:6px}
+.e-info{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:auto}
+.e-info b{color:var(--ink);font-weight:600}
+.e-foot{display:flex;align-items:center;gap:8px;margin-top:2px}
+.e-foot .host{font-size:11.5px;color:#9b99b3}
+.e-foot .btn{margin-left:auto}
+.e-foot .dead{font-size:11.5px;color:var(--warn);font-weight:600}
+
+/* ---------- 时间线 ---------- */
+.section-head{display:flex;align-items:center;gap:10px;margin:34px 0 16px}
+.section-head h2{margin:0;font-size:19px;font-weight:600}
+.section-head::before{content:"";width:4px;height:19px;background:var(--brand);border-radius:2px}
+.section-head .more{margin-left:auto;font-size:12.5px;color:var(--brand);font-weight:600;cursor:pointer}
+.timeline{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:8px 20px}
+.tl-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px dashed var(--line);align-items:flex-start}
+.tl-item:last-child{border-bottom:none}
+.tl-date{flex:none;width:74px;text-align:center;background:var(--brand-soft);border-radius:12px;padding:7px 0}
+.tl-date b{display:block;font-size:17px;color:var(--brand);line-height:1.2}
+.tl-date span{font-size:11px;color:#6A63B8}
+.tl-main{flex:1;min-width:0}
+.tl-main h4{margin:0 0 3px;font-size:14px}
+.tl-main p{margin:0;font-size:12.5px;color:var(--muted)}
+.tl-right{flex:none;font-size:12px;color:var(--muted);text-align:right}
+
+/* ---------- 订阅 ---------- */
+.subscribe{margin-top:26px;background:#fff;border:1px dashed #c9c4f2;border-radius:var(--radius);
+  padding:20px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.subscribe .ico{font-size:28px}
+.subscribe h3{margin:0 0 4px;font-size:16px}
+.subscribe p{margin:0;font-size:12.5px;color:var(--muted)}
+.sub-form{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.sub-form input{font:inherit;font-size:13px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;outline:none;width:210px;background:#fbfaff}
+.sub-form input:focus{border-color:#a9a2ea;background:#fff;box-shadow:0 0 0 3px rgba(127,119,221,.14)}
+
+/* ---------- 空状态 ---------- */
+.empty{background:#fff;border:1px dashed var(--line);border-radius:var(--radius);padding:48px 20px;text-align:center;display:none}
+.empty .emoji{font-size:40px;margin-bottom:8px}
+.empty h3{margin:0 0 5px;font-size:16px}
+.empty p{margin:0;font-size:13px;color:var(--muted)}
+
+/* ---------- 详情弹层 ---------- */
+.sheet{position:fixed;inset:0;z-index:60;display:none;background:rgba(24,20,58,.44);backdrop-filter:blur(3px);padding:24px;overflow:auto}
+.sheet.open{display:flex;align-items:center;justify-content:center}
+.sheet-card{width:100%;max-width:620px;background:#fff;border-radius:20px;padding:26px 28px;box-shadow:0 30px 70px rgba(20,14,60,.32);animation:pop .22s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.sheet-card .close{float:right;border:none;background:#f2f0fb;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;color:#6f6d86}
+.sheet-card h2{margin:0 0 6px;font-size:20px}
+.sheet-card .sub{font-size:12.5px;color:var(--muted);margin:0 0 16px}
+.sheet-sec{margin:14px 0}
+.sheet-sec h4{margin:0 0 6px;font-size:13.5px;color:#3C3489}
+.sheet-sec p,.sheet-sec li{font-size:13px;color:#4a4870;margin:0}
+.sheet-sec ul{margin:0;padding-left:18px}
+.sheet-foot{display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--line);padding-top:16px;margin-top:18px}
+
+.note{max-width:1120px;margin:26px auto 0;padding:0 22px;font-size:12px;color:#9b99b3}
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr}
+  .stats{flex-wrap:wrap}
+  .feature-in{grid-template-columns:1fr}
+  .f-side{display:flex;align-items:center;gap:14px;text-align:left}
+  .f-side .btn{margin-top:0;width:auto;padding:8px 16px}
+  .search{margin-left:0;width:100%}
+  .search input{width:100%}
+  .topbar-in{flex-wrap:wrap;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">🤖 小盒子AI乐园</div>
+    <nav class="nav">
+      <button class="tab">AI 作品集</button>
+      <button class="tab">第4期AI沙龙</button>
+      <button class="tab active">AI 赛事</button>
+    </nav>
+    <span class="proto-flag">原型预览</span>
+    <div class="who"><span class="ava">🙂</span>登录</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <span class="eyebrow">AI EVENTS · 赛事与活动</span>
+      <h1>看比赛、去参赛、<em>把 AI 玩出成绩</em></h1>
+      <p>汇集各类 AI 黑客松、创意挑战赛与训练营信息。找到适合自己的一场比赛，和全国的同龄人一起用 AI 做出东西。</p>
+      <div class="hero-actions">
+        <button class="btn primary">🔥 查看正在报名的赛事</button>
+        <button class="btn ghost">📅 赛事日历</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>8</b><span>收录赛事</span></div>
+      <div class="stat"><b>3</b><span>报名中</span></div>
+      <div class="stat"><b>¥18万</b><span>累计奖池</span></div>
+    </div>
+  </div>
+
+  <!-- 主推 -->
+  <div class="feature">
+    <div class="feature-in">
+      <div>
+        <span class="f-tag">⭐ 主推赛事 · 报名中</span>
+        <h2>2026 AI 应用黑客松（深圳站）· 48 小时创客马拉松</h2>
+        <p>用 AI 在 48 小时内做一个能跑起来的产品原型，主题不限。提供算力与导师，现场有产品经理和工程师带教，适合第一次参赛的中学生组队参加。</p>
+        <div class="f-meta">
+          <span>📅 <b>11 月 21–23 日</b></span>
+          <span>📍 <b>深圳 · 南山创客空间</b></span>
+          <span>🏆 <b>奖池 ¥50,000</b></span>
+          <span>👥 <b>已有 126 人报名</b></span>
+        </div>
+      </div>
+      <div class="f-side">
+        <small>距离报名截止</small>
+        <div class="cd" id="countdown">13 天 06:24:18</div>
+        <button class="btn primary" data-detail="hackathon-sz">立即报名 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选 -->
+  <div class="filterbar">
+    <div class="frow">
+      <span class="label">类型</span>
+      <button class="chip active" data-f="type" data-v="all">全部<em>8</em></button>
+      <button class="chip" data-f="type" data-v="黑客松">黑客松<em>3</em></button>
+      <button class="chip" data-f="type" data-v="挑战赛">挑战赛<em>3</em></button>
+      <button class="chip" data-f="type" data-v="训练营">训练营<em>1</em></button>
+      <button class="chip" data-f="type" data-v="分享会">分享会<em>1</em></button>
+      <div class="search"><span>🔍</span><input id="q" placeholder="搜索赛事名称 / 主办方"></div>
+    </div>
+    <div class="frow">
+      <span class="label">状态</span>
+      <button class="chip active" data-f="status" data-v="all">全部</button>
+      <button class="chip" data-f="status" data-v="报名中">报名中<em>3</em></button>
+      <button class="chip" data-f="status" data-v="进行中">进行中<em>2</em></button>
+      <button class="chip" data-f="status" data-v="已结束">已结束<em>3</em></button>
+      <span class="label" style="margin-left:8px">排序</span>
+      <button class="chip active" data-f="sort" data-v="hot">最新</button>
+      <button class="chip" data-f="sort" data-v="prize">奖池最高</button>
+      <button class="chip" data-f="sort" data-v="deadline">即将截止</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty"><div class="emoji">🔍</div><h3>没有符合条件的赛事</h3><p>换个筛选条件试试，或清空搜索关键词。</p></div>
+
+  <!-- 时间线 -->
+  <div class="section-head"><h2>近期赛事节点</h2><span class="more">查看完整日历 →</span></div>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-date"><b>11.15</b><span>周六</span></div><div class="tl-main"><h4>AI 应用黑客松·深圳站 报名截止</h4><p>报名后 3 个工作日内收到组队与赛前说明</p></div><div class="tl-right">报名中</div></div>
+    <div class="tl-item"><div class="tl-date"><b>11.21</b><span>周五</span></div><div class="tl-main"><h4>AI 应用黑客松·深圳站 开赛</h4><p>48 小时现场开发，11.23 下午路演评审</p></div><div class="tl-right">线下 · 深圳</div></div>
+    <div class="tl-item"><div class="tl-date"><b>11.28</b><span>周五</span></div><div class="tl-main"><h4>校园 AI Agent 挑战赛 作品提交</h4><p>线上提交作品链接 + 3 分钟演示视频</p></div><div class="tl-right">线上</div></div>
+    <div class="tl-item"><div class="tl-date"><b>12.06</b><span>周六</span></div><div class="tl-main"><h4>小盒子 AI 创作马拉松（少儿组）</h4><p>面向 8–14 岁，用 AI 做一个自己的小游戏</p></div><div class="tl-right">报名中</div></div>
+  </div>
+
+  <!-- 订阅 -->
+  <div class="subscribe">
+    <span class="ico">📮</span>
+    <div>
+      <h3>不想错过比赛？</h3>
+      <p>留下邮箱，新赛事开放报名时第一时间通知你。</p>
+    </div>
+    <div class="sub-form">
+      <input placeholder="your@email.com">
+      <button class="btn primary">订阅赛事提醒</button>
+    </div>
+  </div>
+</div>
+
+<div class="note">原型说明：以上赛事为演示数据；「AI 赛事」作为作品集顶部导航第 3 个 Tab（在「第4期AI沙龙」右侧），本页为页面设计预览，确认后再开发接入真实数据。</div>
+
+<!-- 详情弹层 -->
+<div class="sheet" id="sheet">
+  <div class="sheet-card">
+    <button class="close" id="sheetClose">✕</button>
+    <h2 id="sTitle">赛事名称</h2>
+    <p class="sub" id="sSub">主办方 · 时间 · 形式</p>
+    <div class="sheet-sec"><h4>赛事简介</h4><p id="sDesc"></p></div>
+    <div class="sheet-sec"><h4>赛程安排</h4><ul id="sSchedule"></ul></div>
+    <div class="sheet-sec"><h4>奖项设置</h4><p id="sPrize"></p></div>
+    <div class="sheet-sec"><h4>参赛要求</h4><p id="sReq"></p></div>
+    <div class="sheet-foot">
+      <button class="btn ghost" id="sheetCancel">关闭</button>
+      <button class="btn primary" id="sheetJoin">我要报名</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var EVENTS = [
+  {id:'hackathon-sz', title:'2026 AI 应用黑客松（深圳站）', type:'黑客松', status:'报名中',
+   emoji:'🚀', tint:'linear-gradient(135deg,#EDE7FF,#CFC4FF)',
+   desc:'48 小时内用 AI 做出一个能跑的产品原型，主题不限。提供算力、导师与产品工作坊，适合第一次参赛的中学生组队。',
+   host:'小盒子 × 南山创客', date:'11.21–11.23', place:'深圳·线下', prize:'¥50,000',
+   deadline:'11.15 截止', tags:['48小时','现场开发','导师带教'], people:126,
+   schedule:['11.15 报名截止','11.21 开幕 & 组队','11.22 通宵开发 + 导师巡场','11.23 路演评审 & 颁奖'],
+   prizeText:'一等奖 ¥20,000 · 二等奖 ¥15,000 · 三等奖 ¥10,000 · 最佳创意 ¥5,000',
+   req:'初高中在校生，2–4 人组队；自备笔记本，现场提供算力额度。'},
+
+  {id:'agent-campus', title:'校园 AI Agent 挑战赛', type:'挑战赛', status:'报名中',
+   emoji:'🤖', tint:'linear-gradient(135deg,#E4F4FB,#C3E7F7)',
+   desc:'围绕学习与校园生活场景，做一个能真正帮到同学的 AI Agent。评委看重“真的有人用”，而不只是技术花活。',
+   host:'青少年 AI 教育联盟', date:'11.10–11.28', place:'线上', prize:'¥30,000',
+   deadline:'11.08 截止', tags:['Agent','线上提交','可个人参赛'], people:342,
+   schedule:['11.08 报名截止','11.10 开题 & 线上说明会','11.28 作品提交','12.05 公布结果'],
+   prizeText:'金奖 ¥12,000 · 银奖 ¥8,000 · 铜奖 ¥5,000 · 优秀作品若干',
+   req:'12–18 岁，个人或 2 人小组；提交作品链接 + 3 分钟演示视频。'},
+
+  {id:'kids-marathon', title:'小盒子 AI 创作马拉松（少儿组）', type:'黑客松', status:'报名中',
+   emoji:'🎨', tint:'linear-gradient(135deg,#FFE9D6,#FFD1A8)',
+   desc:'面向 8–14 岁，用 AI 做一个属于自己的小游戏或小应用。不求复杂，只求好玩、有想法、能讲清楚。',
+   host:'小盒子AI乐园', date:'12.06 一天', place:'深圳·线下', prize:'奖品 + 证书',
+   deadline:'11.30 截止', tags:['少儿友好','当天出作品','家长可陪同'], people:88,
+   schedule:['11.30 报名截止','12.06 上午 组队 & 主题发布','12.06 下午 创作 & 展示'],
+   prizeText:'最佳作品奖 · 最佳创意奖 · 最佳表达奖（奖品 + 证书）',
+   req:'8–14 岁，需一名家长陪同；无需编程基础。'},
+
+  {id:'youth-coding', title:'全国青少年 AI 创意编程赛', type:'挑战赛', status:'进行中',
+   emoji:'🏅', tint:'linear-gradient(135deg,#DFF5EC,#B9E8D6)',
+   desc:'全国范围的青少年 AI 编程赛事，分小学组、初中组、高中组，作品主题涵盖智能生活、文化传承、科学探索。',
+   host:'全国青少年科技协会', date:'10.01–12.20', place:'线上 + 分赛区', prize:'¥100,000',
+   deadline:'已截止', tags:['全国赛','分组评审','含证书'], people:2100,
+   schedule:['10.01 报名开启','10.31 报名截止','11.01–12.10 作品提交','12.20 全国决赛'],
+   prizeText:'特等奖 3 名各 ¥10,000 · 一等奖 10 名各 ¥5,000 · 二三等奖若干',
+   req:'小学至高中在校生；需通过所在学校或赛区报名。'},
+
+  {id:'ai-day', title:'AI 开放日 · 大模型应用分享会', type:'分享会', status:'进行中',
+   emoji:'🎤', tint:'linear-gradient(135deg,#EDE7FF,#D8CFFF)',
+   desc:'每月一场的线下分享，邀请一线 AI 产品经理与工程师聊真实项目。本月主题：怎么把一个想法做成能上线的产品。',
+   host:'小盒子 × 本地开发者社区', date:'11.08 19:00', place:'深圳·线下 / 直播', prize:'免费',
+   deadline:'名额 80 人', tags:['免费','线下+直播','适合家长'], people:64,
+   schedule:['11.08 19:00 主题分享','20:00 现场问答','20:30 自由交流'],
+   prizeText:'—',
+   req:'不限年龄；未成年人需家长陪同。'},
+
+  {id:'hackathon-gz', title:'AI 黑客松 · 广州站（往期）', type:'黑客松', status:'已结束',
+   emoji:'🌆', tint:'linear-gradient(135deg,#F0EFF6,#DDDAEE)',
+   desc:'上一届广州站，36 小时、42 支队伍、21 件作品。优秀作品已收录进 AI 作品集，可直接试玩。',
+   host:'小盒子 × 广州创客', date:'09.20–09.22', place:'广州', prize:'¥40,000',
+   deadline:'已结束', tags:['36小时','42支队伍','作品可试玩'], people:168,
+   schedule:['已结束'],
+   prizeText:'一等奖 ¥15,000 · 二等奖 ¥12,000 · 三等奖 ¥8,000',
+   req:'已结束，作品可在 AI 作品集查看。'},
+
+  {id:'prompt-cup', title:'Prompt 提示词创意大赛', type:'挑战赛', status:'已结束',
+   emoji:'✍️', tint:'linear-gradient(135deg,#F0EFF6,#DDDAEE)',
+   desc:'用一段提示词生成惊艳的图像或文案。评委从创意、完成度、可复用性三个维度打分。',
+   host:'AI 创意社区', date:'09.01–09.30', place:'线上', prize:'¥20,000',
+   deadline:'已结束', tags:['线上','门槛低','可复用模板'], people:520,
+   schedule:['已结束'],
+   prizeText:'一等奖 ¥8,000 · 二等奖 ¥6,000 · 三等奖 ¥4,000',
+   req:'已结束。'},
+
+  {id:'bootcamp', title:'AI 产品经理训练营（第 2 期）', type:'训练营', status:'已结束',
+   emoji:'📚', tint:'linear-gradient(135deg,#F0EFF6,#DDDAEE)',
+   desc:'6 周线上训练营，从需求洞察到原型落地，每周一次直播 + 作业点评。往期学员作品已上线。',
+   host:'小盒子AI乐园', date:'08.05–09.15', place:'线上', prize:'—',
+   deadline:'已结束', tags:['6周','直播+作业','作品产出'], people:96,
+   schedule:['已结束'],
+   prizeText:'结业证书 + 优秀作品推荐参赛',
+   req:'已结束，第 3 期筹备中。'}
+];
+
+var filter = { type:'all', status:'all', sort:'hot', q:'' };
+
+function statusClass(s){ return s==='报名中' ? 'st-open' : (s==='进行中' ? 'st-live' : 'st-end'); }
+
+function card(e){
+  var btn = e.status==='已结束'
+    ? '<button class="btn ghost sm" data-detail="'+e.id+'">查看回顾</button>'
+    : (e.status==='进行中'
+        ? '<button class="btn ghost sm" data-detail="'+e.id+'">赛程详情</button>'
+        : '<button class="btn primary sm" data-detail="'+e.id+'">报名 →</button>');
+  return '<article class="event">'+
+    '<div class="e-cover" style="background:'+e.tint+'">'+
+      '<span class="e-status '+statusClass(e.status)+'">'+e.status+'</span>'+
+      '<span class="e-type">'+e.type+'</span>'+e.emoji+
+    '</div>'+
+    '<div class="e-body">'+
+      '<h3>'+e.title+'</h3>'+
+      '<p>'+e.desc+'</p>'+
+      '<div class="e-tags">'+e.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join('')+'</div>'+
+      '<div class="e-info">'+
+        '<span>📅 <b>'+e.date+'</b></span>'+
+        '<span>📍 <b>'+e.place+'</b></span>'+
+        '<span>🏆 <b>'+e.prize+'</b></span>'+
+      '</div>'+
+      '<div class="e-foot"><span class="host">'+e.host+'</span>'+
+        (e.status==='报名中' ? '<span class="dead">'+e.deadline+'</span>' : '')+btn+'</div>'+
+    '</div>'+
+  '</article>';
+}
+
+function render(){
+  var list = EVENTS.filter(function(e){
+    return (filter.type==='all'||e.type===filter.type) &&
+           (filter.status==='all'||e.status===filter.status) &&
+           (!filter.q || (e.title+e.host+e.tags.join('')).toLowerCase().indexOf(filter.q.toLowerCase())>=0);
+  });
+  if(filter.sort==='prize'){
+    list.sort(function(a,b){
+      var pa = parseInt((a.prize.match(/\d+/g)||['0']).join(''))||0;
+      var pb = parseInt((b.prize.match(/\d+/g)||['0']).join(''))||0;
+      return pb-pa;
+    });
+  } else if(filter.sort==='deadline'){
+    list.sort(function(a,b){ return (a.status==='报名中'?0:1)-(b.status==='报名中'?0:1); });
+  }
+  document.getElementById('grid').innerHTML = list.map(card).join('');
+  document.getElementById('empty').style.display = list.length ? 'none' : 'block';
+}
+
+document.querySelectorAll('.chip').forEach(function(c){
+  c.addEventListener('click', function(){
+    var f = this.dataset.f, v = this.dataset.v;
+    if(f==='type'||f==='status'||f==='sort'){
+      document.querySelectorAll('.chip[data-f="'+f+'"]').forEach(function(x){ x.classList.remove('active'); });
+      this.classList.add('active');
+      filter[f==='type'?'type':(f==='status'?'status':'sort')] = v;
+      render();
+    }
+  });
+});
+document.getElementById('q').addEventListener('input', function(){ filter.q = this.value.trim(); render(); });
+
+/* 详情 */
+var CUR = null;
+document.addEventListener('click', function(e){
+  var d = e.target.closest('[data-detail]');
+  if(!d) return;
+  var ev = EVENTS.filter(function(x){ return x.id===d.dataset.detail; })[0];
+  if(!ev) return;
+  CUR = ev;
+  document.getElementById('sTitle').textContent = ev.title;
+  document.getElementById('sSub').textContent = ev.host+' · '+ev.date+' · '+ev.place+' · '+ev.status;
+  document.getElementById('sDesc').textContent = ev.desc;
+  document.getElementById('sSchedule').innerHTML = ev.schedule.map(function(s){ return '<li>'+s+'</li>'; }).join('');
+  document.getElementById('sPrize').textContent = ev.prizeText;
+  document.getElementById('sReq').textContent = ev.req;
+  var join = document.getElementById('sheetJoin');
+  join.textContent = ev.status==='已结束' ? '已结束' : (ev.status==='进行中' ? '查看赛程' : '我要报名');
+  join.disabled = ev.status==='已结束';
+  document.getElementById('sheet').classList.add('open');
+});
+document.getElementById('sheetClose').onclick =
+document.getElementById('sheetCancel').onclick = function(){ document.getElementById('sheet').classList.remove('open'); };
+document.getElementById('sheet').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+
+/* 倒计时（演示） */
+(function(){
+  var end = Date.now() + (13*24*3600 + 6*3600 + 24*60 + 18)*1000;
+  setInterval(function(){
+    var s = Math.max(0, Math.floor((end-Date.now())/1000));
+    var d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60), sec = s%60;
+    function p(n){ return n<10?'0'+n:n; }
+    document.getElementById('countdown').textContent = d+' 天 '+p(h)+':'+p(m)+':'+p(sec);
+  }, 1000);
+})();
+
+render();
+</script>
+</body>
+</html>

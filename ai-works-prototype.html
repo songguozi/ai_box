@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 作品集 · 小盒子AI乐园（原型）</title>
+<style>
+:root{
+  --ink:#1c1b2e; --muted:#6f6d86; --line:#e9e7f4;
+  --brand:#534AB7; --brand2:#7F77DD; --brand-soft:#F1F0FE;
+  --bg:#f6f5fb; --card:#fff; --warn:#c8271c; --ok:#0F6E56;
+  --radius:18px; --shadow:0 8px 24px rgba(35,31,80,.07);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+button{font:inherit}
+a{color:inherit}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:11px 22px; background:rgba(255,255,255,.93);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex; align-items:center; gap:9px; font-size:16px; font-weight:700; color:#3C3489; letter-spacing:.3px}
+.brand .sub{font-size:11.5px; font-weight:600; color:#fff; letter-spacing:0;
+  background:linear-gradient(135deg,var(--brand),var(--brand2)); padding:2px 9px; border-radius:999px}
+.tabs{display:flex; gap:8px; margin-left:6px}
+.tab{
+  font-size:14px; font-weight:500; color:#4A41AE; cursor:pointer;
+  padding:7px 16px; border-radius:999px; border:1px solid #DCDAF7; background:#F1F0FE;
+  white-space:nowrap;
+}
+.tab:hover{background:#E7E5FD}
+.tab.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; border-color:transparent;
+  box-shadow:0 6px 16px rgba(83,74,183,.28)}
+.who{
+  margin-left:auto; display:flex; align-items:center; gap:9px; cursor:pointer;
+  padding:5px 14px 5px 5px; border:1px solid var(--line); background:#fff; border-radius:999px;
+  font-size:13px; color:var(--ink);
+}
+.who:hover{border-color:#cfc9f2; background:#fbfaff}
+.who .ava{width:26px; height:26px; border-radius:50%; background:var(--brand-soft); display:grid; place-items:center; font-size:14px; overflow:hidden}
+.who .hint{font-size:11.5px; color:var(--muted); border-left:1px solid var(--line); padding-left:9px}
+
+/* ---------- 视图 ---------- */
+.view{display:none}
+.view.active{display:block}
+.wrap{max-width:1120px; margin:0 auto; padding:0 22px}
+
+/* ---------- 作品集 Hero ---------- */
+.hero{
+  display:grid; grid-template-columns:1fr auto; gap:26px; align-items:end;
+  padding:42px 0 26px;
+}
+.eyebrow{
+  display:inline-block; font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--brand);
+  background:var(--brand-soft); padding:4px 12px; border-radius:999px; margin-bottom:14px;
+}
+.hero h1{margin:0 0 10px; font-size:30px; line-height:1.28; letter-spacing:-.3px}
+.hero h1 em{font-style:normal; color:var(--brand)}
+.hero p{margin:0 0 20px; font-size:14.5px; color:var(--muted); max-width:520px}
+.hero-actions{display:flex; gap:10px; flex-wrap:wrap}
+.stats{display:flex; gap:10px}
+.stat{
+  background:#fff; border:1px solid var(--line); border-radius:14px;
+  padding:12px 18px; min-width:92px; text-align:center;
+}
+.stat b{display:block; font-size:22px; line-height:1.2; color:var(--brand)}
+.stat span{font-size:11.5px; color:var(--muted)}
+
+/* ---------- 按钮 ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  font-size:14px; font-weight:500; text-decoration:none; cursor:pointer;
+  padding:10px 18px; border-radius:11px; border:1px solid transparent; transition:.16s;
+}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff;
+  box-shadow:0 8px 20px rgba(83,74,183,.28)}
+.btn.primary:hover{filter:brightness(1.05); transform:translateY(-1px)}
+.btn.ghost{background:#fff; color:#4A41AE; border-color:#ddd9f7}
+.btn.ghost:hover{background:#f7f6ff; border-color:#c9c4f2}
+.btn.sm{font-size:13px; padding:8px 14px; border-radius:10px}
+.btn.block{width:100%}
+.link{background:none; border:0; padding:0; color:var(--brand); font-size:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px}
+.link:hover{color:#3C3489}
+
+/* ---------- 筛选 ---------- */
+.filterbar{
+  display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center;
+  padding:14px 16px; background:#fff; border:1px solid var(--line); border-radius:16px;
+  margin-bottom:22px;
+}
+.fgroup{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.fgroup .label{font-size:12px; color:#9b99b3; margin-right:2px}
+.chip{
+  display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+  font-size:13px; padding:6px 13px; border-radius:999px;
+  border:1px solid var(--line); background:#fff; color:#4a4870;
+}
+.chip:hover{border-color:#cfc9f2; background:#fbfaff}
+.chip.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; border-color:transparent;
+  box-shadow:0 4px 12px rgba(83,74,183,.24)}
+.chip em{font-style:normal; font-size:11px; opacity:.65}
+
+/* ---------- 作品卡片 ---------- */
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(248px,1fr)); gap:18px; padding-bottom:56px}
+.work{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  box-shadow:var(--shadow); display:flex; flex-direction:column;
+  transition:transform .18s, box-shadow .18s;
+}
+.work:hover{transform:translateY(-3px); box-shadow:0 16px 34px rgba(35,31,80,.13)}
+.cover{position:relative; aspect-ratio:16/10; display:grid; place-items:center; overflow:hidden}
+.cover::after{
+  content:""; position:absolute; inset:auto -20% -45% -20%; height:90%;
+  background:rgba(255,255,255,.35); border-radius:50%; filter:blur(18px);
+}
+.cover-emoji{font-size:52px; line-height:1; position:relative; z-index:1;
+  filter:drop-shadow(0 8px 14px rgba(30,25,70,.18))}
+.cover-type{
+  position:absolute; left:10px; top:10px; z-index:2;
+  font-size:11px; font-weight:600; color:#3a3757;
+  background:rgba(255,255,255,.88); padding:3px 9px; border-radius:999px;
+}
+.cover-del{
+  position:absolute; right:10px; top:10px; z-index:2; cursor:pointer;
+  font-size:11px; color:#8a2b2b; background:rgba(255,255,255,.9);
+  border:1px solid rgba(200,39,28,.25); border-radius:999px; padding:3px 9px;
+}
+.cover-del:hover{background:#fff; color:var(--warn)}
+.work-body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:7px; flex:1}
+.work-body h3{margin:0; font-size:15.5px; line-height:1.35; font-weight:600}
+.work-body p{
+  margin:0; font-size:12.5px; color:var(--muted); line-height:1.55;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:39px;
+}
+.work-meta{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:8px; font-size:12px; color:var(--muted)}
+.author{display:inline-flex; align-items:center; gap:6px; cursor:pointer; padding:3px 8px 3px 3px; border-radius:999px; border:1px solid transparent; background:none}
+.author:hover{background:var(--brand-soft); border-color:#e4e1fb}
+.ava{width:22px; height:22px; border-radius:50%; background:var(--brand-soft); display:grid; place-items:center; font-size:12px; font-style:normal}
+.likes{color:#a8557a}
+.work-body .btn{margin-top:10px}
+
+/* ---------- 空状态 ---------- */
+.empty{
+  grid-column:1/-1; border:1.5px dashed #cfc9f2; border-radius:20px; background:#fbfaff;
+  padding:46px 22px; text-align:center;
+}
+.empty .emoji{font-size:44px; line-height:1; margin-bottom:10px}
+.empty h3{margin:0 0 6px; font-size:16px}
+.empty p{margin:0 0 16px; font-size:13px; color:var(--muted)}
+
+/* ---------- 个人主页 ---------- */
+.profile{
+  position:relative; overflow:hidden; margin:28px 0 26px;
+  background:linear-gradient(125deg,#332C86 0%,#5A50C8 52%,#8B82E9 100%);
+  color:#fff; border-radius:24px; padding:26px 28px;
+  display:grid; grid-template-columns:auto 1fr auto; gap:22px; align-items:center;
+  box-shadow:0 18px 42px rgba(60,52,137,.3);
+}
+.profile::before,.profile::after{
+  content:""; position:absolute; border-radius:50%; background:rgba(255,255,255,.09); pointer-events:none;
+}
+.profile::before{width:240px; height:240px; right:-70px; top:-120px}
+.profile::after{width:150px; height:150px; right:90px; bottom:-100px; background:rgba(255,255,255,.06)}
+.profile-ava{
+  width:78px; height:78px; border-radius:24px; display:grid; place-items:center; font-size:40px;
+  background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.34);
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,.07); position:relative; z-index:1;
+}
+.profile-main{position:relative; z-index:1; min-width:0}
+.profile-name{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:22px; font-weight:600; letter-spacing:-.2px}
+.pill{font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px;
+  background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.32)}
+.profile-sub{margin-top:6px; font-size:12.5px; opacity:.82; display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.profile-sub code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px;
+  background:rgba(255,255,255,.14); padding:2px 8px; border-radius:6px}
+.profile-stats{display:flex; gap:26px; margin-top:14px}
+.profile-stats div{text-align:left}
+.profile-stats b{display:block; font-size:19px; line-height:1.25; font-weight:600}
+.profile-stats span{font-size:11.5px; opacity:.7}
+.profile-actions{display:flex; flex-direction:column; gap:8px; position:relative; z-index:1}
+.btn.white{background:#fff; color:#3C3489; box-shadow:0 8px 18px rgba(15,10,60,.22)}
+.btn.white:hover{background:#f5f3ff}
+.btn.onwhite{background:rgba(255,255,255,.14); color:#fff; border-color:rgba(255,255,255,.42)}
+.btn.onwhite:hover{background:rgba(255,255,255,.24)}
+.back-bar{display:flex; align-items:center; gap:10px; margin-top:18px; padding:10px 16px;
+  background:#fff; border:1px solid var(--line); border-radius:14px; font-size:13px; color:var(--muted)}
+.section-head{display:flex; align-items:center; gap:10px; margin:0 0 16px}
+.section-head h2{margin:0; font-size:19px; font-weight:600}
+.section-head::before{content:""; width:4px; height:19px; background:var(--brand); border-radius:2px}
+.section-head .count{font-size:12px; color:var(--muted); margin-left:auto}
+
+/* ---------- 上传 ---------- */
+.upload-wrap{display:grid; grid-template-columns:1.12fr .88fr; gap:22px; align-items:start; padding:30px 0 60px}
+.form-card{background:#fff; border:1px solid var(--line); border-radius:22px; padding:24px 26px; box-shadow:var(--shadow)}
+.form-head{margin-bottom:20px}
+.form-head h1{margin:0 0 6px; font-size:21px}
+.form-head p{margin:0; font-size:13px; color:var(--muted)}
+.who-line{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:12.5px; color:#4a4870; background:var(--brand-soft);
+  border:1px solid #e4e1fb; border-radius:12px; padding:9px 13px; margin-bottom:22px;
+}
+.who-line b{color:#3C3489}
+.who-line code{font-family:ui-monospace,Menlo,monospace; font-size:11.5px; background:#fff; padding:1px 6px; border-radius:5px}
+.field{margin-bottom:19px}
+.field > label{display:block; font-size:13px; font-weight:600; color:#3a3757; margin-bottom:8px}
+.req{color:var(--warn); margin-left:2px}
+.field .counter{float:right; font-weight:400; font-size:11.5px; color:#b0aec4}
+input[type=text], textarea{
+  width:100%; font:inherit; font-size:14px; color:var(--ink);
+  padding:11px 13px; border:1px solid #e2dff2; border-radius:12px; background:#fbfaff;
+  outline:none; transition:border .15s, box-shadow .15s, background .15s; resize:vertical;
+}
+input[type=text]::placeholder, textarea::placeholder{color:#b6b4c8}
+input[type=text]:focus, textarea:focus{border-color:#a9a2ea; box-shadow:0 0 0 3px rgba(127,119,221,.16); background:#fff}
+.seg{display:flex; gap:8px; flex-wrap:wrap}
+.emoji-row{display:grid; grid-template-columns:repeat(6, 44px); gap:8px; justify-content:start}
+.emoji-row button{
+  width:44px; height:44px; font-size:21px; line-height:1; cursor:pointer;
+  border:1px solid #e2dff2; border-radius:13px; background:#fbfaff; transition:.14s;
+}
+.emoji-row button:hover{border-color:#c9c4f2; transform:translateY(-1px)}
+.emoji-row button.on{border-color:var(--brand2); background:var(--brand-soft); box-shadow:0 0 0 3px rgba(127,119,221,.18)}
+.hint{font-size:11.5px; color:#9b99b3; margin-top:7px}
+.err{font-size:12px; color:var(--warn); margin-top:6px; display:none}
+.err.show{display:block}
+.form-foot{display:flex; gap:10px; align-items:center; padding-top:6px; border-top:1px solid var(--line); margin-top:4px; padding-top:18px}
+.preview-card{
+  background:#fff; border:1px dashed #c9c4f2; border-radius:22px; padding:18px;
+  position:sticky; top:82px;
+}
+.preview-label{font-size:12px; font-weight:600; color:var(--brand); letter-spacing:.5px; margin-bottom:12px}
+.preview-note{margin-top:14px; font-size:11.5px; color:#9b99b3; line-height:1.6}
+
+/* ---------- 身份弹窗 ---------- */
+.modal{
+  position:fixed; inset:0; z-index:100; display:none;
+  background:rgba(24,20,58,.42); backdrop-filter:blur(3px);
+  padding:24px; overflow:auto;
+}
+.modal.open{display:flex; align-items:center; justify-content:center}
+.modal-card{
+  width:100%; max-width:520px; background:#fff; border-radius:24px; padding:28px;
+  box-shadow:0 30px 70px rgba(20,14,60,.3); animation:pop .22s ease-out;
+}
+@keyframes pop{from{opacity:0; transform:translateY(10px) scale(.98)} to{opacity:1; transform:none}}
+.modal-card h2{margin:0 0 6px; font-size:20px}
+.modal-card p{margin:0 0 20px; font-size:13px; color:var(--muted)}
+.id-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(80px,1fr)); gap:10px}
+.id-card{
+  cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:14px 8px; border:1px solid var(--line); border-radius:16px; background:#fbfaff;
+  transition:.15s;
+}
+.id-card:hover{border-color:#c9c4f2; background:#f5f3ff; transform:translateY(-2px)}
+.id-card.on{border-color:var(--brand2); background:var(--brand-soft); box-shadow:0 0 0 3px rgba(127,119,221,.16)}
+.id-ava{font-size:26px; line-height:1; width:42px; height:42px; border-radius:14px; display:grid; place-items:center}
+.id-card b{font-size:13.5px; font-weight:600}
+.id-card i{font-style:normal; font-size:11px; color:#9b99b3}
+.modal-foot{margin-top:18px; display:flex; justify-content:space-between; align-items:center; gap:12px}
+.modal-foot small{font-size:11.5px; color:#9b99b3; line-height:1.5}
+
+/* ---------- Toast / 页脚 ---------- */
+.toast{
+  position:fixed; left:50%; bottom:28px; transform:translate(-50%,14px); z-index:120;
+  background:#211c46; color:#fff; font-size:13px; padding:11px 20px; border-radius:999px;
+  box-shadow:0 14px 34px rgba(20,14,60,.34); opacity:0; pointer-events:none; transition:.22s;
+  max-width:calc(100vw - 40px);
+}
+.toast.show{opacity:1; transform:translate(-50%,0)}
+footer{text-align:center; font-size:11.5px; color:#a3a1b8; padding:26px 20px 40px; line-height:1.8}
+footer b{color:#8a87a8; font-weight:600}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:880px){
+  .hero{grid-template-columns:1fr; align-items:start; gap:18px}
+  .stats{flex-wrap:wrap}
+  .upload-wrap{grid-template-columns:1fr}
+  .preview-card{position:static}
+  .profile{grid-template-columns:auto 1fr; padding:22px}
+  .profile-actions{grid-column:1/-1; flex-direction:row; flex-wrap:wrap}
+  .profile-actions .btn{flex:1; min-width:140px}
+}
+@media (max-width:640px){
+  .topbar{padding:10px 14px; gap:10px}
+  .brand{font-size:14.5px}
+  .tabs{order:3; width:100%; margin-left:0}
+  .tab{flex:1; text-align:center; padding:7px 8px; font-size:13px}
+  .who{margin-left:auto}
+  .wrap{padding:0 14px}
+  .hero h1{font-size:24px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px}
+  .cover-emoji{font-size:40px}
+  .work-body{padding:11px 12px 13px}
+  .work-body h3{font-size:14px}
+  .work-body p{font-size:11.5px; min-height:0}
+  .profile{grid-template-columns:1fr; text-align:left}
+  .profile-ava{width:64px; height:64px; font-size:32px; border-radius:20px}
+  .profile-name{font-size:19px}
+  .form-card{padding:20px 18px}
+  .id-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">🤖 小盒子AI乐园 <span class="sub">AI 作品集</span></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" data-view="gallery">作品集</button>
+    <button class="tab" data-view="upload">上传作品</button>
+    <button class="tab" data-view="home">我的主页</button>
+  </nav>
+  <button class="who" id="whoBtn"><span class="ava">🙂</span><span class="who-name">选择身份</span></button>
+</div>
+
+<!-- ================= 视图 1：作品集 ================= -->
+<section id="view-gallery" class="view">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <span class="eyebrow">AI 作品集</span>
+        <h1>小朋友们的 <em>AI 作品</em> 都在这里</h1>
+        <p>每期沙龙，孩子们用 AI 做出自己的小游戏。点开就能玩，点作者就能进他/她的个人主页，看到全部作品。</p>
+        <div class="hero-actions">
+          <button class="btn primary" data-go="upload">＋ 上传我的作品</button>
+          <button class="btn ghost" data-go="home">进入我的主页 →</button>
+        </div>
+      </div>
+      <div class="stats" id="heroStats"></div>
+    </div>
+
+    <div class="filterbar">
+      <div class="fgroup" id="filterStudents"><span class="label">学员</span></div>
+      <div class="fgroup" id="filterTypes"><span class="label">类型</span></div>
+    </div>
+
+    <div class="grid" id="galleryGrid"></div>
+  </div>
+</section>
+
+<!-- ================= 视图 2：上传作品 ================= -->
+<section id="view-upload" class="view">
+  <div class="wrap">
+    <div class="upload-wrap">
+      <form class="form-card" id="uploadForm" novalidate>
+        <div class="form-head">
+          <h1>上传我的作品</h1>
+          <p>填好信息点发布，作品会立刻出现在自己的主页和作品集里。</p>
+        </div>
+
+        <div class="who-line" id="uploadWho"></div>
+
+        <div class="field">
+          <label for="fTitle">作品名称<span class="req">*</span><span class="counter" id="titleCount">0 / 24</span></label>
+          <input type="text" id="fTitle" maxlength="24" placeholder="例如：植物大战僵尸 · 我的版本" autocomplete="off">
+          <div class="err" id="titleErr">请先给作品起个名字</div>
+        </div>
+
+        <div class="field">
+          <label for="fDesc">一句话介绍<span class="counter" id="descCount">0 / 40</span></label>
+          <textarea id="fDesc" rows="2" maxlength="40" placeholder="例如：种向日葵收集阳光，放豌豆射手打僵尸"></textarea>
+        </div>
+
+        <div class="field">
+          <label>作品类型</label>
+          <div class="seg" id="fType"></div>
+        </div>
+
+        <div class="field">
+          <label>选一个封面</label>
+          <div class="emoji-row" id="fEmoji"></div>
+          <div class="hint">原型用表情代替封面图；正式版支持上传截图，自动裁成 16:10。</div>
+        </div>
+
+        <div class="field">
+          <label for="fUrl">作品链接</label>
+          <input type="text" id="fUrl" placeholder="https://www.songguodata.com/zhaoyihe/pvz/" autocomplete="off">
+          <div class="hint">填游戏部署地址，别人点「试玩」就能直接打开；留空则显示为「待上架」。</div>
+        </div>
+
+        <div class="form-foot">
+          <button type="submit" class="btn primary">发布到我的主页</button>
+          <button type="button" class="btn ghost" data-go="home">取消</button>
+        </div>
+      </form>
+
+      <aside class="preview-card">
+        <div class="preview-label">实时预览</div>
+        <div id="previewSlot"></div>
+        <div class="preview-note">
+          作品发布后会自动带上作者、期数和主页入口。<br>
+          别人点作者头像，就能进你的主页看到全部作品。
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 视图 3：个人主页 ================= -->
+<section id="view-home" class="view">
+  <div class="wrap">
+    <div id="profileSlot"></div>
+    <div id="backSlot"></div>
+    <div class="section-head">
+      <h2 id="homeTitle">我的作品</h2>
+      <span class="count" id="homeCount"></span>
+    </div>
+    <div class="grid" id="homeGrid"></div>
+  </div>
+</section>
+
+<footer>
+  <b>原型说明</b> · 数据只保存在本机浏览器，刷新不丢失但不跨设备；正式版会接入学员登录、作品存储与真实上传。<br>
+  页面结构与「小盒子AI乐园」现有站点保持一致。
+</footer>
+
+<!-- 身份选择 -->
+<div class="modal" id="idModal">
+  <div class="modal-card">
+    <h2>你是哪位小朋友？</h2>
+    <p>选一次就好，之后打开直接进入自己的主页。</p>
+    <div class="id-grid" id="idGrid"></div>
+    <div class="modal-foot">
+      <small>正式版用学员账号登录，不需要手动选。</small>
+      <button class="link" id="skipId">随便看看</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 数据 ---------------- */
+  var STUDENTS = [
+    { py:'zhaoyihe', name:'赵伊荷', ava:'👧', tint:'#FFE4EF', grade:'四年级', term:'第 4 期' },
+    { py:'zhangsan', name:'张三',   ava:'👦', tint:'#E2E6FF', grade:'三年级', term:'第 4 期' },
+    { py:'lisi',     name:'李四',   ava:'🧒', tint:'#FFF4D6', grade:'三年级', term:'第 4 期' },
+    { py:'daiwei',   name:'戴维',   ava:'🧑', tint:'#DFF5EC', grade:'五年级', term:'第 3 期' },
+    { py:'zhaosong', name:'赵松',   ava:'👨', tint:'#EDE7FF', grade:'五年级', term:'第 3 期' }
+  ];
+
+  var PALETTE = {
+    '🌻': ['#E4F3D9','#B7E0A8'], '🐹': ['#FFE9D6','#FFC9A3'], '🚀': ['#E2E6FF','#B9C2FF'],
+    '🐱': ['#FFE4EF','#FFC2D8'], '🌐': ['#E3F2FD','#BBDEFB'], '🎮': ['#EDE7FF','#CFC4FF'],
+    '🏰': ['#FFF4D6','#FFDFA3'], '🦖': ['#DFF5EC','#B2E6D2'], '🐟': ['#E4F4FB','#BEE4F5'],
+    '⚽': ['#EAF0E4','#CFE0C0'], '🎨': ['#FFEEF0','#FFD0D8'], '🤖': ['#E8ECF5','#C9D3E8']
+  };
+  var EMOJIS = ['🌻','🐹','🚀','🐱','🌐','🎮','🏰','🦖','🐟','⚽','🎨','🤖'];
+  var TYPES = ['小游戏','动画','网页','其他'];
+
+  var SEED = [
+    { id:'w1', title:'植物大战僵尸 · 我的版本', desc:'种向日葵收集阳光，放豌豆射手打僵尸。',
+      emoji:'🌻', type:'小游戏', py:'zhaoyihe', url:'/pvz/', tags:['第 4 期'], likes:12, date:'2026-10-24' },
+    { id:'w2', title:'小猫钓鱼', desc:'点击鱼竿，钓到不同的小鱼会加分。',
+      emoji:'🐱', type:'小游戏', py:'zhaoyihe', url:'', tags:['第 4 期'], likes:8, date:'2026-10-24' },
+    { id:'w3', title:'打地鼠', desc:'地鼠从洞里冒出来，30 秒内敲得越多越好。',
+      emoji:'🐹', type:'小游戏', py:'daiwei', url:'', tags:['第 3 期'], likes:21, date:'2026-09-20' },
+    { id:'w4', title:'太空射击', desc:'用方向键移动飞船，空格发射激光。',
+      emoji:'🚀', type:'小游戏', py:'zhaosong', url:'', tags:['第 3 期'], likes:15, date:'2026-09-20' }
+  ];
+
+  var KEY = 'aiworks:proto:v1';
+  var db = loadDB();
+  var filter = { student:'all', type:'all' };
+  var viewAs = null;                       // 正在查看谁的主页（null = 自己）
+  var draft = { emoji:'🌻', type:'小游戏' };
+
+  /* ---------------- 工具 ---------------- */
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
+    });
+  }
+  function studentOf(py) {
+    for (var i = 0; i < STUDENTS.length; i++) if (STUDENTS[i].py === py) return STUDENTS[i];
+    return { py:py, name:'未署名', ava:'🙂', tint:'#EDE7FF', grade:'', term:'' };
+  }
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function byDate(a, b) { return String(b.date || '').localeCompare(String(a.date || '')); }
+
+  function loadDB() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && Array.isArray(d.works)) return { me: d.me || null, works: d.works };
+      }
+    } catch (e) {}
+    return { me: null, works: JSON.parse(JSON.stringify(SEED)) };
+  }
+  function saveDB() {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+
+  /* ---------------- 卡片模板 ---------------- */
+  function cardHTML(w, manage) {
+    var s = studentOf(w.py);
+    var pal = PALETTE[w.emoji] || ['#EDE7FF','#CFC4FF'];
+    var playable = w.url && w.url !== '#';
+    return '' +
+      '<article class="work" data-id="' + w.id + '">' +
+        '<div class="cover" style="background:linear-gradient(140deg,' + pal[0] + ',' + pal[1] + ')">' +
+          '<span class="cover-emoji">' + w.emoji + '</span>' +
+          '<span class="cover-type">' + esc(w.type) + '</span>' +
+          (manage ? '<button class="cover-del" data-del="' + w.id + '">删除</button>' : '') +
+        '</div>' +
+        '<div class="work-body">' +
+          '<h3>' + esc(w.title) + '</h3>' +
+          '<p>' + esc(w.desc || '这个小作者还没写介绍～') + '</p>' +
+          '<div class="work-meta">' +
+            '<button class="author" data-author="' + w.py + '" title="查看 ' + esc(s.name) + ' 的主页">' +
+              '<i class="ava" style="background:' + (s.tint || '#EDE7FF') + '">' + s.ava + '</i>' + esc(s.name) +
+            '</button>' +
+            '<span class="likes">♥ ' + (w.likes || 0) + '</span>' +
+          '</div>' +
+          (playable
+            ? '<a class="btn primary sm block" href="' + esc(w.url) + '" target="_blank" rel="noopener">试玩 →</a>'
+            : '<span class="btn ghost sm block" style="cursor:default;color:#a3a1b8">作品待上架</span>') +
+        '</div>' +
+      '</article>';
+  }
+
+  function emptyHTML(title, desc, cta) {
+    return '<div class="empty">' +
+      '<div class="emoji">🧩</div>' +
+      '<h3>' + esc(title) + '</h3>' +
+      '<p>' + esc(desc) + '</p>' + (cta || '') + '</div>';
+  }
+
+  /* ---------------- 视图切换 ---------------- */
+  var VIEWS = ['gallery', 'upload', 'home'];
+
+  function go(view, replace) {
+    if (VIEWS.indexOf(view) === -1) view = 'home';
+    $$('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + view); });
+    $$('.tab').forEach(function (t) { t.classList.toggle('active', t.dataset.view === view); });
+    if (replace !== false) {
+      try { history.replaceState(null, '', '#' + view); } catch (e) { location.hash = view; }
+    }
+    if (view === 'gallery') renderGallery();
+    if (view === 'home') renderHome();
+    if (view === 'upload') { renderUploadWho(); renderPreview(); }
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------- 顶栏身份 ---------------- */
+  function renderWho() {
+    var btn = $('#whoBtn');
+    var s = db.me ? studentOf(db.me) : null;
+    if (s) {
+      btn.innerHTML = '<span class="ava" style="background:' + (s.tint || '#F1F0FE') + '">' + s.ava + '</span><span class="who-name">' + esc(s.name) + '</span><span class="hint">切换</span>';
+    } else {
+      btn.innerHTML = '<span class="ava">🙂</span><span class="who-name">选择身份</span>';
+    }
+  }
+
+  /* ---------------- 作品集 ---------------- */
+  function renderGallery() {
+    var owners = {};
+    db.works.forEach(function (w) { owners[w.py] = 1; });
+
+    $('#heroStats').innerHTML =
+      '<div class="stat"><b>' + db.works.length + '</b><span>收录作品</span></div>' +
+      '<div class="stat"><b>' + Object.keys(owners).length + '</b><span>参与学员</span></div>' +
+      '<div class="stat"><b>4</b><span>已办期数</span></div>';
+
+    var chips = '<span class="label">学员</span>' +
+      '<button class="chip ' + (filter.student === 'all' ? 'active' : '') + '" data-fs="all">全部</button>';
+    STUDENTS.forEach(function (s) {
+      var n = db.works.filter(function (w) { return w.py === s.py; }).length;
+      chips += '<button class="chip ' + (filter.student === s.py ? 'active' : '') + '" data-fs="' + s.py + '">' +
+        s.ava + ' ' + esc(s.name) + '<em>' + n + '</em></button>';
+    });
+    $('#filterStudents').innerHTML = chips;
+
+    var types = '<span class="label">类型</span>' +
+      '<button class="chip ' + (filter.type === 'all' ? 'active' : '') + '" data-ft="all">全部</button>';
+    TYPES.forEach(function (t) {
+      types += '<button class="chip ' + (filter.type === t ? 'active' : '') + '" data-ft="' + t + '">' + t + '</button>';
+    });
+    $('#filterTypes').innerHTML = types;
+
+    var list = db.works.filter(function (w) {
+      return (filter.student === 'all' || w.py === filter.student) &&
+             (filter.type === 'all' || w.type === filter.type);
+    }).sort(byDate);
+
+    $('#galleryGrid').innerHTML = list.length
+      ? list.map(function (w) { return cardHTML(w, false); }).join('')
+      : emptyHTML('这个筛选下还没有作品', '换一个学员或类型看看，也可以上传自己的作品。',
+          '<button class="btn primary" data-go="upload">＋ 上传我的作品</button>');
+  }
+
+  /* ---------------- 个人主页 ---------------- */
+  function renderHome() {
+    if (!db.me) { openIdentity(); return; }
+
+    var target = (viewAs && viewAs !== db.me) ? viewAs : db.me;
+    var s = studentOf(target);
+    var isMe = target === db.me;
+    var mine = db.works.filter(function (w) { return w.py === target; }).sort(byDate);
+    var likes = mine.reduce(function (a, b) { return a + (b.likes || 0); }, 0);
+
+    $('#profileSlot').innerHTML =
+      '<div class="profile">' +
+        '<div class="profile-ava">' + s.ava + '</div>' +
+        '<div class="profile-main">' +
+          '<div class="profile-name">' + esc(s.name) + '的游戏小屋 <span class="pill">' + esc(s.term) + ' 学员</span></div>' +
+          '<div class="profile-sub">' + esc(s.grade) + ' · 主页地址 <code>songguodata.com/' + s.py + '/</code></div>' +
+          '<div class="profile-stats">' +
+            '<div><b>' + mine.length + '</b><span>作品</span></div>' +
+            '<div><b>' + likes + '</b><span>获赞</span></div>' +
+            '<div><b>' + esc(s.term) + '</b><span>参与</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="profile-actions">' +
+          (isMe
+            ? '<button class="btn white" data-go="upload">＋ 上传作品</button>'
+            : '<button class="btn white" id="backMine">← 返回我的主页</button>') +
+          '<button class="btn onwhite" data-copy="' + s.py + '">复制主页链接</button>' +
+        '</div>' +
+      '</div>';
+
+    $('#backSlot').innerHTML = isMe ? '' :
+      '<div class="back-bar">你正在查看 <b style="color:#3C3489">' + esc(s.name) + '</b> 的主页（他人视角：不显示上传与删除）' +
+      '　<button class="link" id="backMine2">回到我的主页</button></div>';
+
+    $('#homeTitle').textContent = isMe ? '我的作品' : esc(s.name) + ' 的作品';
+    $('#homeCount').textContent = mine.length ? '共 ' + mine.length + ' 件' : '';
+
+    $('#homeGrid').innerHTML = mine.length
+      ? mine.map(function (w) { return cardHTML(w, isMe); }).join('')
+      : emptyHTML(
+          isMe ? '你的小屋还空着' : esc(s.name) + ' 还没有作品',
+          isMe ? '上传第一个作品，它会自动出现在你的主页和作品集里。' : '等他/她下次沙龙上传吧。',
+          isMe ? '<button class="btn primary" data-go="upload">＋ 上传第一个作品</button>' : '');
+  }
+
+  /* ---------------- 上传表单 ---------------- */
+  function renderUploadWho() {
+    var s = db.me ? studentOf(db.me) : null;
+    $('#uploadWho').innerHTML = s
+      ? '当前身份 <b>' + s.ava + ' ' + esc(s.name) + '</b> · 发布会出现在 <code>/' + s.py + '/</code> 主页上' +
+        '　<button class="link" id="switchId">换个身份</button>'
+      : '还没选择身份　<button class="link" id="switchId">先选一个</button>';
+  }
+
+  function buildFormControls() {
+    $('#fType').innerHTML = TYPES.map(function (t) {
+      return '<button type="button" class="chip ' + (draft.type === t ? 'active' : '') + '" data-type="' + t + '">' + t + '</button>';
+    }).join('');
+
+    $('#fEmoji').innerHTML = EMOJIS.map(function (e) {
+      return '<button type="button" class="' + (draft.emoji === e ? 'on' : '') + '" data-emoji="' + e + '">' + e + '</button>';
+    }).join('');
+  }
+
+  function renderPreview() {
+    var w = {
+      id: 'preview',
+      title: ($('#fTitle') && $('#fTitle').value.trim()) || '作品名称',
+      desc: ($('#fDesc') && $('#fDesc').value.trim()) || '一句话介绍会显示在这里',
+      emoji: draft.emoji, type: draft.type,
+      py: db.me || 'zhaoyihe',
+      url: ($('#fUrl') && $('#fUrl').value.trim()) || '',
+      likes: 0, date: today()
+    };
+    $('#previewSlot').innerHTML = cardHTML(w, false);
+    var t = $('#titleCount'), d = $('#descCount');
+    if (t) t.textContent = $('#fTitle').value.length + ' / 24';
+    if (d) d.textContent = $('#fDesc').value.length + ' / 40';
+  }
+
+  function resetForm() {
+    $('#fTitle').value = '';
+    $('#fDesc').value = '';
+    $('#fUrl').value = '';
+    $('#titleErr').classList.remove('show');
+    draft = { emoji:'🌻', type:'小游戏' };
+    buildFormControls();
+    renderPreview();
+  }
+
+  function submitWork(e) {
+    e.preventDefault();
+    var title = $('#fTitle').value.trim();
+    if (!title) {
+      $('#titleErr').classList.add('show');
+      $('#fTitle').focus();
+      return;
+    }
+    if (!db.me) { openIdentity(); return; }
+
+    var w = {
+      id: 'w' + Date.now(),
+      title: title,
+      desc: $('#fDesc').value.trim(),
+      emoji: draft.emoji,
+      type: draft.type,
+      py: db.me,
+      url: $('#fUrl').value.trim(),
+      tags: [],
+      likes: 0,
+      date: today()
+    };
+    db.works.unshift(w);
+    saveDB();
+    resetForm();
+    viewAs = null;
+    go('home');
+    toast('已发布到你的主页 🎉');
+  }
+
+  /* ---------------- 身份弹窗 ---------------- */
+  function openIdentity() {
+    $('#idGrid').innerHTML = STUDENTS.map(function (s) {
+      return '<button type="button" class="id-card ' + (db.me === s.py ? 'on' : '') + '" data-pick="' + s.py + '">' +
+        '<span class="id-ava" style="background:' + s.tint + '">' + s.ava + '</span><b>' + esc(s.name) + '</b><i>' + esc(s.grade) + '</i></button>';
+    }).join('');
+    $('#idModal').classList.add('open');
+  }
+  function closeIdentity() { $('#idModal').classList.remove('open'); }
+
+  function pickIdentity(py) {
+    db.me = py;
+    saveDB();
+    viewAs = null;
+    renderWho();
+    closeIdentity();
+    go('home');
+    toast('欢迎，' + studentOf(py).name + ' 👋');
+  }
+
+  /* ---------------- 事件 ---------------- */
+  $$('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      if (t.dataset.view === 'home') viewAs = null;
+      go(t.dataset.view);
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    var el;
+
+    if ((el = e.target.closest('[data-go]'))) { go(el.dataset.go); return; }
+
+    if ((el = e.target.closest('[data-fs]'))) { filter.student = el.dataset.fs; renderGallery(); return; }
+    if ((el = e.target.closest('[data-ft]'))) { filter.type = el.dataset.ft; renderGallery(); return; }
+
+    if ((el = e.target.closest('[data-pick]'))) { pickIdentity(el.dataset.pick); return; }
+
+    if ((el = e.target.closest('[data-author]'))) {
+      var py = el.dataset.author;
+      viewAs = (py === db.me) ? null : py;
+      if (!db.me) { openIdentity(); return; }
+      go('home');
+      return;
+    }
+
+    if ((el = e.target.closest('[data-del]'))) {
+      var id = el.dataset.del;
+      var w = db.works.filter(function (x) { return x.id === id; })[0];
+      if (!w) return;
+      if (!confirm('确定删除《' + w.title + '》吗？原型里删除后不可恢复。')) return;
+      db.works = db.works.filter(function (x) { return x.id !== id; });
+      saveDB();
+      renderHome();
+      toast('已删除');
+      return;
+    }
+
+    if ((el = e.target.closest('[data-copy]'))) {
+      var url = 'https://www.songguodata.com/' + el.dataset.copy + '/';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function () { toast('主页链接已复制'); },
+          function () { toast(url); });
+      } else { toast(url); }
+      return;
+    }
+
+    if (e.target.id === 'whoBtn' || (e.target.closest && e.target.closest('#whoBtn'))) { openIdentity(); return; }
+    if (e.target.id === 'switchId') { openIdentity(); return; }
+    if (e.target.id === 'backMine' || e.target.id === 'backMine2') { viewAs = null; renderHome(); return; }
+    if (e.target.id === 'skipId') { closeIdentity(); return; }
+    if (e.target.id === 'idModal') { closeIdentity(); return; }
+  });
+
+  $('#uploadForm').addEventListener('submit', submitWork);
+  $('#uploadForm').addEventListener('input', function (e) {
+    if (e.target.id === 'fTitle' && e.target.value.trim()) $('#titleErr').classList.remove('show');
+    renderPreview();
+  });
+  $('#uploadForm').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-type]');
+    var m = e.target.closest('[data-emoji]');
+    if (t) { draft.type = t.dataset.type; buildFormControls(); renderPreview(); }
+    if (m) { draft.emoji = m.dataset.emoji; buildFormControls(); renderPreview(); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeIdentity();
+  });
+
+  window.addEventListener('hashchange', function () {
+    var v = (location.hash || '').replace('#', '');
+    if (VIEWS.indexOf(v) !== -1) go(v, false);
+  });
+
+  /* ---------------- 启动 ---------------- */
+  // 演示用：?as=zhaoyihe 直接以某个学员身份打开（等同登录后自动进自己主页）
+  try {
+    var as = new URLSearchParams(location.search).get('as');
+    if (as && STUDENTS.some(function (s) { return s.py === as; })) {
+      db.me = as;
+      saveDB();
+    }
+  } catch (e) {}
+
+  buildFormControls();
+  renderWho();
+
+  var hashView = (location.hash || '').replace('#', '');
+  if (db.me) {
+    go(VIEWS.indexOf(hashView) !== -1 ? hashView : 'home');
+  } else {
+    go('gallery');
+    openIdentity();
+  }
+})();
+</script>
+</body>
+</html>
